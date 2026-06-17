@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creative Residency Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:#2C2420; --ink-2:#524740; --ink-3:#8A7E76;
+  --paper:#FBF8F4; --paper-2:#F5EFE7; --paper-3:#EDE4D8; --rule:#DDD4C8;
+  --accent:#B85C38; --accent-2:#D4845A; --accent-lt:#FAEEE8;
+  --warm:#6B8F71; --warm-lt:#EAF2EB; --sky:#5B7FA6; --sky-lt:#EBF1F8; --radius:6px; --max:900px;
+}
+body { font-family:'DM Sans',system-ui,sans-serif; background:var(--paper); color:var(--ink); font-size:15px; line-height:1.65; min-height:100vh; }
+
+/* ── INTAKE ── */
+#intake-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:3rem 2rem; }
+.intake-box { width:100%; max-width:680px; }
+.intake-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,42px); font-weight:400; line-height:1.15; margin-bottom:6px; }
+.intake-wordmark em { font-style:italic; color:var(--accent); }
+.intake-sub { font-size:15px; color:var(--ink-3); margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid var(--rule); }
+.intake-section-head { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-3); margin:2.25rem 0 1.25rem; padding-bottom:8px; border-bottom:1px solid var(--rule); }
+.intake-step { margin-bottom:1.5rem; }
+.intake-label { display:block; font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-2); margin-bottom:8px; }
+.intake-label span { font-weight:400; color:var(--ink-3); text-transform:none; letter-spacing:0; font-size:12px; margin-left:6px; }
+.chip-row { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { padding:7px 14px; border-radius:100px; border:1px solid var(--rule); background:#fff; font-size:13px; color:var(--ink-2); cursor:pointer; transition:all 0.12s; font-family:inherit; user-select:none; }
+.chip:hover { border-color:var(--accent-2); color:var(--accent); }
+.chip.selected { background:var(--accent); border-color:var(--accent); color:#fff; }
+.intake-input { width:100%; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; height:40px; }
+.intake-input:focus { border-color:var(--accent-2); }
+.intake-input::placeholder { color:var(--ink-3); }
+.intake-textarea { width:100%; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:12px 14px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; min-height:80px; line-height:1.6; outline:none; transition:border-color 0.15s; }
+.intake-textarea:focus { border-color:var(--accent-2); }
+.intake-textarea::placeholder { color:var(--ink-3); }
+.date-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.date-field label { display:block; font-size:12px; color:var(--ink-3); margin-bottom:5px; }
+
+/* blackout builder */
+.blackout-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+.blackout-entry { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:10px 12px; }
+.blackout-entry input, .blackout-entry select { border:1px solid var(--rule); border-radius:4px; background:var(--paper); padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; width:100%; }
+.blackout-entry input:focus, .blackout-entry select:focus { border-color:var(--accent-2); }
+.blackout-entry .remove-btn { background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:18px; line-height:1; padding:2px 4px; border-radius:3px; font-family:inherit; }
+.blackout-entry .remove-btn:hover { color:var(--warm); background:var(--warm-lt); }
+.add-blackout-btn { background:none; border:1px dashed var(--rule); border-radius:var(--radius); padding:8px 14px; font-family:inherit; font-size:13px; color:var(--ink-3); cursor:pointer; width:100%; transition:all 0.12s; }
+.add-blackout-btn:hover { border-color:var(--accent-2); color:var(--accent); background:var(--accent-lt); }
+.blackout-col-heads { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; padding:0 12px; margin-bottom:4px; }
+.blackout-col-heads span { font-size:11px; color:var(--ink-3); font-weight:500; }
+
+.generate-btn { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; margin-top:0.5rem; transition:background 0.15s,opacity 0.15s; }
+.generate-btn:hover { background:#9E4A2A; }
+.generate-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.error-box { background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:1rem 1.25rem; font-size:13px; color:#991B1B; margin-top:1rem; line-height:1.65; }
+
+/* ── LOADING ── */
+#loading-screen { display:none; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:1.5rem; padding:2rem; }
+.loading-title { font-family:'DM Serif Display',serif; font-size:24px; font-weight:400; color:var(--ink); text-align:center; }
+.loading-status { font-size:14px; color:var(--ink-3); text-align:center; max-width:360px; line-height:1.7; }
+.loading-bar-wrap { width:240px; height:3px; background:var(--paper-3); border-radius:2px; overflow:hidden; }
+.loading-bar { height:100%; background:var(--accent); border-radius:2px; width:0%; transition:width 0.4s ease; }
+
+/* ── APP ── */
+#app-screen { display:none; }
+.site-header { background:var(--accent); color:#fff; padding:2rem 2rem 1.75rem; }
+.site-header-inner { max-width:var(--max); margin:0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.site-title { font-family:'DM Serif Display',serif; font-size:clamp(22px,3.5vw,32px); font-weight:400; line-height:1.2; margin-bottom:4px; }
+.site-title em { font-style:italic; opacity:0.6; }
+.site-meta { font-size:12px; opacity:0.5; letter-spacing:0.04em; text-transform:uppercase; }
+.header-btns { display:flex; gap:8px; flex-shrink:0; }
+.restart-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:var(--radius); color:rgba(255,255,255,0.7); font-family:inherit; font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+.restart-btn:hover { background:rgba(255,255,255,0.18); }
+.phase-bar { background:#9E4A2A; padding:0 2rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+.phase-inner { max-width:var(--max); margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.ph { background:rgba(255,255,255,0.07); border:1.5px solid transparent; border-radius:var(--radius); padding:8px 10px; cursor:pointer; transition:background 0.15s; }
+.ph:hover { background:rgba(255,255,255,0.13); }
+.ph.active { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.35); }
+.ph-label { font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); margin-bottom:2px; }
+.ph-name { font-size:12px; font-weight:500; color:#fff; line-height:1.3; margin-bottom:3px; }
+.ph-dates { font-size:11px; color:rgba(255,255,255,0.4); }
+.nav-bar { background:var(--paper-2); border-bottom:1px solid var(--rule); padding:0 2rem; position:sticky; top:0; z-index:10; }
+.nav-inner { max-width:var(--max); margin:0 auto; display:flex; overflow-x:auto; gap:0; }
+.nav-inner button { background:none; border:none; border-bottom:2.5px solid transparent; padding:13px 16px; font-size:13px; font-weight:500; color:var(--ink-3); cursor:pointer; white-space:nowrap; transition:color 0.15s,border-color 0.15s; font-family:inherit; }
+.nav-inner button:hover { color:var(--ink); }
+.nav-inner button.active { color:var(--accent); border-bottom-color:var(--accent); }
+main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
+.tab { display:none; }
+.tab.active { display:block; }
+.section-intro { font-size:15px; color:var(--ink-3); line-height:1.8; max-width:600px; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--rule); }
+.phase-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:2rem; }
+.phase-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; border-top:3px solid var(--accent); }
+.phase-card:nth-child(2) { border-top-color:var(--warm); }
+.phase-card:nth-child(3) { border-top-color:var(--sky); }
+.phase-card:nth-child(4) { border-top-color:var(--ink-2); }
+.phase-eyebrow { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); margin-bottom:6px; }
+.phase-card:nth-child(2) .phase-eyebrow { color:var(--warm); }
+.phase-card:nth-child(3) .phase-eyebrow { color:var(--sky); }
+.phase-card:nth-child(4) .phase-eyebrow { color:var(--ink-2); }
+.phase-card h3 { font-family:'DM Serif Display',serif; font-size:18px; font-weight:400; margin-bottom:4px; line-height:1.3; }
+.phase-dates { font-size:12px; color:var(--ink-3); margin-bottom:10px; }
+.phase-body { font-size:13px; color:var(--ink-3); line-height:1.75; margin-bottom:12px; }
+.tag-row { display:flex; flex-wrap:wrap; gap:5px; }
+.tag { font-size:11px; padding:3px 8px; border-radius:3px; border:1px solid var(--rule); color:var(--ink-3); background:var(--paper); }
+.filter-banner { display:none; align-items:center; justify-content:space-between; background:var(--accent-lt); border:1px solid #F0C9B8; border-radius:var(--radius); padding:10px 14px; margin-bottom:1.5rem; font-size:13px; color:var(--accent); }
+.filter-banner.visible { display:flex; }
+.filter-clear { background:none; border:1px solid #F0C9B8; border-radius:var(--radius); padding:4px 10px; font-size:12px; font-weight:500; color:var(--accent); cursor:pointer; font-family:inherit; }
+.filter-clear:hover { background:rgba(184,92,56,0.08); }
+.week-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+.week-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
+.week-card.hidden { display:none; }
+.week-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--rule); }
+.week-title { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; }
+.week-range { font-size:12px; color:var(--ink-3); margin-top:2px; }
+.week-badge { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.badge-p1 { background:var(--accent-lt); color:var(--accent); }
+.badge-p2 { background:var(--warm-lt); color:#3D6642; }
+.badge-p3 { background:var(--sky-lt); color:var(--sky); }
+.badge-p4 { background:#EDEAE5; color:var(--ink-2); }
+.day-row { display:grid; grid-template-columns:64px 1fr; gap:8px; padding:7px 0; border-top:1px solid var(--paper-2); align-items:start; }
+.day-label { font-size:12px; font-weight:500; color:var(--ink-3); padding-top:2px; }
+.day-content { font-size:13px; line-height:1.65; color:var(--ink-2); outline:none; border-radius:3px; padding:1px 4px; margin:-1px -4px; transition:background 0.1s; cursor:text; }
+.day-content:hover { background:var(--paper); }
+.day-content:focus { background:var(--accent-lt); }
+.blackout-day { color:#8C3030; font-style:italic; }
+.edit-hint { font-size:11px; color:var(--ink-3); margin-top:12px; padding-top:10px; border-top:1px solid var(--paper-2); }
+.schedule-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; gap:12px; }
+.print-btn { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:8px 16px; font-family:inherit; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; gap:6px; transition:background 0.12s,border-color 0.12s; flex-shrink:0; }
+.print-btn:hover { background:var(--paper-2); border-color:var(--ink-3); }
+.print-btn svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
+.project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+.project-card { background:#fff; border:1px solid var(--rule); border-top:3px solid var(--accent-2); border-radius:var(--radius); padding:1.25rem; }
+.project-title { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:8px; }
+.project-body { font-size:13px; color:var(--ink-3); line-height:1.75; margin-bottom:12px; }
+.rhythm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:1.5rem; }
+.rhythm-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
+.rhythm-time { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:4px; }
+.rhythm-label { font-size:12px; color:var(--ink-3); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--rule); }
+.rhythm-items { font-size:13px; color:var(--ink-3); line-height:2; }
+.artist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+.artist-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
+.artist-name { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:3px; }
+.artist-focus { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-2); margin-bottom:8px; }
+.artist-body { font-size:13px; color:var(--ink-3); line-height:1.7; }
+.artist-admired-badge { display:inline-block; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; background:var(--accent-lt); color:var(--accent); padding:2px 7px; border-radius:3px; margin-bottom:8px; }
+.resource-group { margin-bottom:2.5rem; }
+.resource-group h3 { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; margin-bottom:1rem; padding-bottom:8px; border-bottom:1px solid var(--rule); }
+.resource-item { padding:14px 0; border-bottom:1px solid var(--paper-2); }
+.resource-item:last-child { border-bottom:none; }
+.resource-title { font-size:14px; font-weight:500; color:var(--ink); }
+.resource-meta { font-size:12px; color:var(--accent-2); margin-bottom:4px; }
+.resource-why { font-size:13px; color:var(--ink-3); line-height:1.7; }
+.resource-owned { display:inline-block; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; background:var(--warm-lt); color:#3D6642; padding:2px 7px; border-radius:3px; margin-left:8px; vertical-align:middle; }
+.info-box { background:var(--paper-2); border-left:3px solid var(--accent); border-radius:0 var(--radius) var(--radius) 0; padding:1rem 1.25rem; margin-top:1.5rem; }
+.info-box h4 { font-size:13px; font-weight:500; margin-bottom:6px; color:var(--accent); }
+.info-box p { font-size:13px; color:var(--ink-3); line-height:1.75; }
+.budget-bar { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.budget-label { font-size:13px; color:var(--ink-3); }
+.budget-amount { font-family:'DM Serif Display',serif; font-size:20px; color:var(--accent); }
+
+/* ── PRINT ── */
+@media print {
+  #intake-screen, #loading-screen { display:none !important; }
+  .site-header, .phase-bar, .nav-bar, .print-btn, .restart-btn, .filter-banner, .edit-hint, .schedule-actions, .header-btns { display:none !important; }
+  #app-screen { display:block !important; }
+  .tab { display:none !important; }
+  .tab#schedule { display:block !important; }
+  .week-card.hidden { display:block !important; }
+  body { background:#fff; font-size:12px; }
+  main { padding:0; max-width:100%; }
+  .week-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .week-card { page-break-inside:avoid; border:0.5px solid #ccc; padding:0.75rem; }
+  .print-header { display:block !important; padding:1rem 0 0.75rem; border-bottom:1px solid #ccc; margin-bottom:1rem; }
+  .print-header h1 { font-family:Georgia,serif; font-size:20px; font-weight:400; }
+  .print-header p { font-size:11px; color:#666; margin-top:3px; }
+}
+.print-header { display:none; }
+
+@media (max-width:600px) {
+  .phase-inner { grid-template-columns:repeat(2,1fr); }
+  .site-header, .phase-bar, .nav-bar { padding-left:1rem; padding-right:1rem; }
+  main { padding:1.5rem 1rem 3rem; }
+  .blackout-entry { grid-template-columns:1fr 1fr; grid-template-rows:auto auto; }
+  .date-row { grid-template-columns:1fr; }
+}
+
+/* ── FOOTER ── */
+.site-footer {
+  background:var(--paper-3);
+  border-top:1px solid var(--rule);
+  padding:1.25rem 2rem;
+  text-align:center;
+  font-size:12px;
+  color:var(--ink-3);
+  letter-spacing:0.02em;
+}
+.site-footer a {
+  color:var(--ink-3);
+  text-decoration:none;
+  border-bottom:1px solid var(--rule);
+  transition:color 0.15s, border-color 0.15s;
+}
+.site-footer a:hover { color:var(--accent); border-bottom-color:var(--accent); }
+.site-footer .footer-dot { margin:0 8px; opacity:0.4; }
+@media print { .site-footer { display:none; } }
+/* ── SAVED BADGE ── */
+.saved-badge { display:none; align-items:center; gap:6px; background:var(--warm-lt); border:1px solid #c0d8c4; border-radius:var(--radius); padding:5px 12px; font-size:12px; color:#3D6642; font-weight:500; }
+.saved-badge svg { width:13px; height:13px; stroke:#3D6642; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+/* ── LICENSE GATE ── */
+.license-box { width:100%; max-width:480px; text-align:center; }
+.license-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,40px); font-weight:400; line-height:1.15; margin-bottom:8px; }
+.license-wordmark em { font-style:italic; color:var(--accent); }
+.license-sub { font-size:14px; color:var(--ink-3); margin-bottom:2rem; line-height:1.7; }
+.license-input-wrap { display:flex; gap:8px; margin-bottom:12px; }
+.license-input { flex:1; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; letter-spacing:0.04em; }
+.license-input:focus { border-color:var(--accent); }
+.license-input::placeholder { color:var(--ink-3); letter-spacing:0; }
+.license-btn { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.15s,opacity 0.15s; }
+.license-btn:hover { background:#9E4A2A; }
+.license-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.license-error { font-size:13px; color:#991B1B; background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; display:none; }
+.license-help { font-size:12px; color:var(--ink-3); line-height:1.7; }
+.license-help a { color:var(--accent); text-decoration:none; }
+.license-help a:hover { text-decoration:underline; }
+.license-divider { border:none; border-top:1px solid var(--rule); margin:1.5rem 0; }
+
+
+/* ── TEST GATE ── */
+#gate-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; }
+.gate-box { width:100%; max-width:460px; text-align:center; }
+.gate-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,40px); font-weight:400; line-height:1.15; margin-bottom:8px; }
+.gate-wordmark em { font-style:italic; color:var(--accent); }
+.gate-sub { font-size:14px; color:var(--ink-3); margin-bottom:2rem; line-height:1.75; }
+.gate-input-wrap { display:flex; gap:8px; margin-bottom:10px; }
+.gate-input { flex:1; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; letter-spacing:0.06em; text-transform:uppercase; }
+.gate-input:focus { border-color:var(--accent); }
+.gate-input::placeholder { color:var(--ink-3); letter-spacing:0; text-transform:none; }
+.gate-btn { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+.gate-btn:hover { background:#9E4A2A; }
+.gate-error { font-size:13px; color:#991B1B; background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; display:none; line-height:1.6; }
+.gate-help { font-size:12px; color:var(--ink-3); margin-top:10px; line-height:1.7; }
+.gate-help a { color:var(--accent); text-decoration:none; }
+.gate-help a:hover { text-decoration:underline; }
+.gate-divider { border:none; border-top:1px solid var(--rule); margin:1.5rem 0; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ GATE ══════════════ -->
+<div id="gate-screen">
+  <div class="gate-box">
+    <h1 class="gate-wordmark">Your Creative<br><em>Residency</em></h1>
+    <p class="gate-sub">Enter your access key to get started.<br>Don't have one? Purchase lifetime access below.</p>
+    <div id="gate-error" class="gate-error"></div>
+    <div class="gate-input-wrap">
+      <input type="text" class="gate-input" id="gate-key-input" placeholder="Enter your key" autocomplete="off" spellcheck="false">
+      <button class="gate-btn" id="gate-btn" onclick="checkKey()">Unlock</button>
+    </div>
+    <p class="gate-help">Questions? <a href="mailto:brittonclarkceramics@gmail.com">brittonclarkceramics@gmail.com</a></p>
+    <hr class="gate-divider">
+    <p class="gate-help"><a href="https://brittonclark.gumroad.com/l/creativeresidency" target="_blank">Purchase Your Creative Residency →</a></p>
+  </div>
+</div>
+
+<!-- ══════════════ INTAKE ══════════════ -->
+<div id="intake-screen" style="display:none;">
+  <div class="intake-box">
+    <h1 class="intake-wordmark">Your Creative<br><em>Residency</em></h1>
+    <p class="intake-sub">Answer a few questions and get a full practice plan built around your medium, your schedule, and your creative goals.</p>
+
+    <!-- SECTION: Practice -->
+    <div class="intake-section-head">Your practice</div>
+
+    <div class="intake-step">
+      <label class="intake-label">Your medium <span>pick up to 2</span></label>
+      <div class="chip-row" id="chip-medium">
+        <button class="chip" data-val="Ceramics / pottery">Ceramics</button>
+        <button class="chip" data-val="Painting (oil or acrylic)">Painting</button>
+        <button class="chip" data-val="Watercolor">Watercolor</button>
+        <button class="chip" data-val="Gouache">Gouache</button>
+        <button class="chip" data-val="Drawing / illustration">Drawing</button>
+        <button class="chip" data-val="Pastel and charcoal drawing">Pastel / charcoal</button>
+        <button class="chip" data-val="Printmaking">Printmaking</button>
+        <button class="chip" data-val="Fiber arts / weaving / textile">Fiber arts</button>
+        <button class="chip" data-val="Embroidery and hand stitching">Embroidery</button>
+        <button class="chip" data-val="Natural dyeing and surface design on cloth">Natural dyeing</button>
+        <button class="chip" data-val="Sculpture">Sculpture</button>
+        <button class="chip" data-val="Photography">Photography</button>
+        <button class="chip" data-val="Mixed media / collage">Mixed media</button>
+        <button class="chip" data-val="Jewelry making">Jewelry</button>
+        <button class="chip" data-val="Metalworking and blacksmithing">Metalworking</button>
+        <button class="chip" data-val="Leathercraft and leather goods">Leathercraft</button>
+        <button class="chip" data-val="Woodworking and furniture making">Woodworking</button>
+        <button class="chip" data-val="Bookbinding and paper arts">Bookbinding</button>
+        <button class="chip" data-val="Glass art and fused glass">Glass art</button>
+        <button class="chip" data-val="Digital illustration and visual art">Digital art</button>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Skill level <span>be honest, not modest</span></label>
+      <div class="chip-row" id="chip-level">
+        <button class="chip" data-val="Beginner (less than 2 years)">Beginner</button>
+        <button class="chip" data-val="Intermediate (2–7 years)">Intermediate</button>
+        <button class="chip" data-val="Advanced (7+ years)">Advanced</button>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Primary goals <span>pick up to 3</span></label>
+      <div class="chip-row" id="chip-goals">
+        <button class="chip" data-val="Build a market-ready body of work for selling">Selling at markets</button>
+        <button class="chip" data-val="Develop a distinctive artistic style or voice">Develop my style</button>
+        <button class="chip" data-val="Build a portfolio for applications or exhibitions">Portfolio / exhibitions</button>
+        <button class="chip" data-val="Learn and master specific technical skills">Master techniques</button>
+        <button class="chip" data-val="Establish a consistent creative practice">Consistent practice</button>
+        <button class="chip" data-val="Explore freely without a defined outcome">Explore freely</button>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Techniques or projects you want to explore <span>optional</span></label>
+      <textarea class="intake-textarea" id="techniques-input" placeholder="e.g. hand lettering, natural dyeing, plein air painting, surface decoration, building a series around a specific theme…"></textarea>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Artists you admire <span>comma-separated names, any medium</span></label>
+      <input type="text" class="intake-input" id="artists-input" placeholder="e.g. Agnes Martin, Hawthorn Ceramics, Cy Twombly, Shalya Marsh">
+    </div>
+
+    <!-- SECTION: Schedule & time -->
+    <div class="intake-section-head">Schedule &amp; time</div>
+
+    <div class="intake-step">
+      <label class="intake-label">Residency dates</label>
+      <div class="date-row">
+        <div class="date-field">
+          <label for="start-date">Start date</label>
+          <input type="date" class="intake-input" id="start-date" value="2026-06-12">
+        </div>
+        <div class="date-field">
+          <label for="end-date">End date</label>
+          <input type="date" class="intake-input" id="end-date" value="2026-09-30">
+        </div>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Available studio time per week</label>
+      <div class="chip-row" id="chip-time">
+        <button class="chip" data-val="~5 hours per week (tight schedule, evenings only)">~5 hrs</button>
+        <button class="chip" data-val="~10 hours per week (mornings and weekends)">~10 hrs</button>
+        <button class="chip" data-val="~20 hours per week (significant blocks available)">~20 hrs</button>
+        <button class="chip" data-val="Full-time (30+ hours per week)">Full-time</button>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Out-of-studio dates <span>travel, commitments, planned breaks</span></label>
+      <div class="blackout-col-heads">
+        <span>From</span><span>To</span><span>Reason</span><span></span>
+      </div>
+      <div class="blackout-list" id="blackout-list"></div>
+      <button class="add-blackout-btn" onclick="addBlackout()">+ Add dates</button>
+    </div>
+
+    <!-- SECTION: Budget & resources -->
+    <div class="intake-section-head">Budget &amp; resources</div>
+
+    <div class="intake-step">
+      <label class="intake-label">Approximate budget for the residency <span>supplies, tools, workshops, books</span></label>
+      <div class="chip-row" id="chip-budget">
+        <button class="chip" data-val="Under $100 — working with what I have">Under $100</button>
+        <button class="chip" data-val="$100–$300 — modest purchases">$100–$300</button>
+        <button class="chip" data-val="$300–$750 — room for meaningful investment">$300–$750</button>
+        <button class="chip" data-val="$750–$1,500 — serious toolkit upgrade">$750–$1,500</button>
+        <button class="chip" data-val="$1,500+ — significant investment budget">$1,500+</button>
+      </div>
+    </div>
+
+    <div class="intake-step">
+      <label class="intake-label">Existing resources <span>what you already have access to</span></label>
+      <textarea class="intake-textarea" id="resources-input" placeholder="e.g. wheel and kiln at a shared studio, a full set of oil paints, a darkroom, a loom, a Silhouette cutter, membership at a makerspace, a large outdoor space for plein air…"></textarea>
+    </div>
+
+    <div id="intake-error" class="error-box" style="display:none;"></div>
+    <button class="generate-btn" id="generate-btn" onclick="startGeneration()">Generate my residency plan →</button>
+  </div>
+</div>
+
+<!-- ══════════════ LOADING ══════════════ -->
+<div id="loading-screen">
+  <div class="loading-title">Building your residency…</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="loading-status" id="loading-status">Drafting your phases</div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app-screen">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div>
+        <h1 class="site-title" id="site-title">Creative Residency <em id="title-year">2026</em></h1>
+        <p class="site-meta" id="site-meta-line">Your practice, your plan</p>
+      </div>
+      <div class="header-btns">
+        <button class="restart-btn" onclick="restartApp()">Start over</button>
+      </div>
+    </div>
+  </header>
+  <div class="phase-bar">
+    <div class="phase-inner" id="phase-bar-inner"></div>
+  </div>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <button class="active" onclick="showTab('overview',this)">Overview</button>
+      <button onclick="showTab('schedule',this)">Weekly schedule</button>
+      <button onclick="showTab('projects',this)">Projects</button>
+      <button onclick="showTab('rhythm',this)">Daily rhythm</button>
+      <button onclick="showTab('artists',this)">Artists to study</button>
+      <button onclick="showTab('resources',this)">Books &amp; resources</button>
+    </div>
+  </nav>
+  <main>
+    <div class="print-header">
+      <h1 id="print-title">Creative Residency — Weekly Schedule</h1>
+      <p id="print-sub"></p>
+    </div>
+    <div id="overview" class="tab active"></div>
+    <div id="schedule" class="tab"></div>
+    <div id="projects" class="tab"></div>
+    <div id="rhythm" class="tab"></div>
+    <div id="artists" class="tab"></div>
+    <div id="resources" class="tab"></div>
+  </main>
+</div>
+
+<script>
+const PHASE_COLORS = ['badge-p1','badge-p2','badge-p3','badge-p4'];
+
+// ── Chip setup ──
+function setupChips() {
+  document.querySelectorAll('.chip-row').forEach(row => {
+    const maxSel = row.id === 'chip-goals' ? 3 : row.id === 'chip-medium' ? 2 : 1;
+    row.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('selected')) { chip.classList.remove('selected'); return; }
+        const sel = row.querySelectorAll('.chip.selected');
+        if (sel.length < maxSel) chip.classList.add('selected');
+        else if (maxSel === 1) { sel[0].classList.remove('selected'); chip.classList.add('selected'); }
+      });
+    });
+  });
+}
+function getChipVals(id) {
+  return Array.from(document.querySelectorAll('#'+id+' .chip.selected')).map(c => c.dataset.val);
+}
+
+// ── Blackout date builder ──
+let blackoutCount = 0;
+function addBlackout() {
+  blackoutCount++;
+  const id = 'bo-'+blackoutCount;
+  const div = document.createElement('div');
+  div.className = 'blackout-entry';
+  div.id = id;
+  div.innerHTML = `
+    <input type="date" class="bo-from">
+    <input type="date" class="bo-to">
+    <select class="bo-reason">
+      <option value="Travel">Travel</option>
+      <option value="Family commitment">Family</option>
+      <option value="Work obligation">Work</option>
+      <option value="Holiday">Holiday</option>
+      <option value="Planned rest">Planned rest</option>
+      <option value="Other">Other</option>
+    </select>
+    <button class="remove-btn" onclick="removeBlackout('${id}')" title="Remove">×</button>`;
+  document.getElementById('blackout-list').appendChild(div);
+}
+function removeBlackout(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+function getBlackouts() {
+  const entries = [];
+  document.querySelectorAll('.blackout-entry').forEach(entry => {
+    const from = entry.querySelector('.bo-from').value;
+    const to = entry.querySelector('.bo-to').value;
+    const reason = entry.querySelector('.bo-reason').value;
+    if (from) entries.push({ from, to: to || from, reason });
+  });
+  return entries;
+}
+
+// ── Date helpers ──
+function formatDateShort(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(m)-1]+' '+parseInt(d);
+}
+function formatDateRange(startIso, endIso) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [sy,sm,sd] = startIso.split('-').map(Number);
+  const [ey,em,ed] = endIso.split('-').map(Number);
+  const startStr = months[sm-1]+' '+sd;
+  const endStr = sm===em ? String(ed) : months[em-1]+' '+ed;
+  return startStr+'–'+endStr;
+}
+function weeksBetween(startIso, endIso) {
+  const ms = new Date(endIso) - new Date(startIso);
+  return Math.round(ms / (7*24*60*60*1000));
+}
+
+// ── Nav ──
+function showTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-inner button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function selectPhase(idx) {
+  document.querySelectorAll('.ph').forEach((p,i) => p.classList.toggle('active', i===idx));
+  showTab('schedule', document.querySelector('.nav-inner button:nth-child(2)'));
+  filterByPhase(idx+1);
+}
+function filterByPhase(phase) {
+  document.querySelectorAll('.week-card').forEach(c => c.classList.toggle('hidden', parseInt(c.dataset.phase)!==phase));
+  const banner = document.getElementById('filter-banner');
+  if (banner) { document.getElementById('filter-label').textContent = window._phaseNames[phase]; banner.classList.add('visible'); }
+}
+function clearFilter() {
+  document.querySelectorAll('.week-card').forEach(c => c.classList.remove('hidden'));
+  const banner = document.getElementById('filter-banner');
+  if (banner) banner.classList.remove('visible');
+  document.querySelectorAll('.ph').forEach(p => p.classList.remove('active'));
+}
+function printSchedule() { window.print(); }
+function restartApp() {
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('intake-screen').style.display = 'flex';
+  document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
+  ['techniques-input','artists-input','resources-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('intake-error').style.display = 'none';
+}
+function setProgress(pct, msg) {
+  document.getElementById('loading-bar').style.width = pct+'%';
+  document.getElementById('loading-status').textContent = msg;
+}
+
+// ── API ──
+async function callClaude(prompt, maxTokens = 1200, system) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system: system || 'You are a helpful assistant. Respond ONLY with valid JSON. No markdown fences, no preamble, no explanation. Keep string values concise — 1-2 sentences max unless specified otherwise.',
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message || 'API error');
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('Response was cut off — please try again. If this keeps happening, shorten your technique or resource descriptions.');
+  }
+  const raw = data.content.map(b => b.text||'').join('').trim()
+    .replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(raw);
+}
+
+// ── Generation ──
+async function startGeneration() {
+  const mediums   = getChipVals('chip-medium');
+  const medium    = mediums.join(' and ');
+  const level     = getChipVals('chip-level')[0];
+  const time      = getChipVals('chip-time')[0];
+  const goals     = getChipVals('chip-goals');
+  const budget    = getChipVals('chip-budget')[0];
+  const techniques = document.getElementById('techniques-input').value.trim();
+  const admiredArtists = document.getElementById('artists-input').value.trim();
+  const existingResources = document.getElementById('resources-input').value.trim();
+  const startDate = document.getElementById('start-date').value;
+  const endDate   = document.getElementById('end-date').value;
+  const blackouts = getBlackouts();
+  const errorEl   = document.getElementById('intake-error');
+  errorEl.style.display = 'none';
+
+  if (!mediums.length || !level || !time || goals.length===0) {
+    errorEl.textContent = 'Please select your medium, skill level, available time, and at least one goal.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
+    errorEl.textContent = 'Please set a valid start and end date for your residency.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const totalWeeks = weeksBetween(startDate, endDate);
+  const startLabel = formatDateShort(startDate);
+  const endLabel   = formatDateShort(endDate);
+  const blackoutSummary = blackouts.length
+    ? blackouts.map(b => `${formatDateShort(b.from)}${b.to!==b.from?' – '+formatDateShort(b.to):''} (${b.reason})`).join('; ')
+    : 'none';
+
+  const context = [
+    `Medium: ${medium}`,
+    `Level: ${level}`,
+    `Weekly time: ${time}`,
+    `Goals: ${goals.join(', ')}`,
+    `Techniques/interests: ${techniques||'none specified'}`,
+    `Artists they admire: ${admiredArtists||'none specified'}`,
+    `Budget: ${budget||'unspecified'}`,
+    `Existing resources/equipment: ${existingResources||'none specified'}`,
+    `Residency dates: ${startLabel} – ${endLabel} (${totalWeeks} weeks)`,
+    `Out-of-studio dates: ${blackoutSummary}`
+  ].join('. ');
+
+  document.getElementById('generate-btn').disabled = true;
+  document.getElementById('intake-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'flex';
+  setProgress(5, 'Designing your four phases…');
+
+  // Phase date math — split total weeks roughly 22/27/34/17
+  function addWeeks(isoDate, weeks) {
+    const d = new Date(isoDate);
+    d.setDate(d.getDate() + weeks*7);
+    return d.toISOString().split('T')[0];
+  }
+  const w = totalWeeks;
+  const p1end = addWeeks(startDate, Math.round(w*0.22));
+  const p2end = addWeeks(startDate, Math.round(w*0.49));
+  const p3end = addWeeks(startDate, Math.round(w*0.83));
+  const phases_dates = [
+    { dates: formatDateRange(startDate,p1end),       dur: Math.round(w*0.22)+' weeks' },
+    { dates: formatDateRange(addWeeks(p1end,1),p2end), dur: Math.round(w*0.27)+' weeks' },
+    { dates: formatDateRange(addWeeks(p2end,1),p3end), dur: Math.round(w*0.34)+' weeks' },
+    { dates: formatDateRange(addWeeks(p3end,1),endDate), dur: Math.round(w*0.17)+' weeks' }
+  ];
+
+  try {
+    setProgress(15, 'Designing your four phases…');
+    // phases: 4 objects, short strings — 800 tokens is plenty
+    const phasesData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist running ${startLabel} to ${endLabel}. Context: ${context}
+
+Return JSON:
+{"tagline":"8-12 word tagline for this residency","intro":"2-sentence description of the residency arc and core approach","phases":[{"name":"Short phase name (3-5 words)","dates":"use exactly these dates","duration":"use exactly this duration","description":"2-sentence description of what happens in this phase and why","tags":["tag1","tag2","tag3","tag4"]}]}
+
+Use exactly these phase dates and durations:
+Phase 1: dates="${phases_dates[0].dates}", duration="${phases_dates[0].dur}"
+Phase 2: dates="${phases_dates[1].dates}", duration="${phases_dates[1].dur}"
+Phase 3: dates="${phases_dates[2].dates}", duration="${phases_dates[2].dur}"
+Phase 4: dates="${phases_dates[3].dates}", duration="${phases_dates[3].dur}"
+
+Tags should be specific techniques or activities relevant to ${medium}, not generic words. Keep description to 1-2 short sentences.`,
+      800
+    );
+
+    setProgress(35, 'Building your weekly schedule…');
+    // schedule: up to 16 week objects, each with 2 day rows — needs the most tokens
+    const numWeekEntries = Math.min(Math.ceil(totalWeeks / 1.2), 14);
+    const scheduleData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
+
+Out-of-studio dates: ${blackoutSummary}. Mark blackout weeks in the relevant day entry with a brief note and one prep suggestion.
+
+Phase names: P1: ${phasesData.phases[0].name}, P2: ${phasesData.phases[1].name}, P3: ${phasesData.phases[2].name}, P4: ${phasesData.phases[3].name}
+
+Return JSON with exactly this shape:
+{"weeks":[{"title":"Week 1","range":"${startLabel}–[end]","phase":1,"days":[{"label":"Mon–Fri","content":"1 sentence of studio activities"},{"label":"Weekend","content":"1 sentence weekend focus"}]}]}
+
+Generate ${numWeekEntries} entries total. Group middle weeks into pairs (e.g. "Weeks 5–6") to keep the JSON compact. Phase mapping: first 22% = phase 1, next 27% = phase 2, next 34% = phase 3, final 17% = phase 4. Keep each content value to ONE sentence. No bullet lists inside content strings.`,
+      3500
+    );
+
+    setProgress(52, 'Identifying project threads…');
+    // projects: 5-6 objects with short descriptions
+    const projectsData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
+
+Return JSON:
+{"intro":"1-2 sentence project approach","projects":[{"title":"Project name (4-6 words)","description":"2 sentences max on what this involves and what the artist produces","tags":["tag1","tag2","tag3"],"phases":"Phases 1–4"}]}
+
+Generate 5 project threads specific to ${medium}. Prioritize existing resources: ${existingResources||'none'}. Budget: ${budget||'unspecified'}. Keep descriptions short.`,
+      1400
+    );
+
+    setProgress(67, 'Mapping daily rhythm…');
+    // rhythm: 4 time slots, short item lists
+    const rhythmData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
+
+Return JSON:
+{"intro":"1-2 sentence rhythm overview","slots":[{"time":"Time of day label","label":"Hours · Context note","items":["activity 1","activity 2","activity 3"]}],"accountability":"1-2 sentence consistency strategy","accountabilityTitle":"4-6 word title"}
+
+Generate 4 time slots for: ${time}. 3 items per slot max. Items specific to ${medium}.`,
+      900
+    );
+
+    setProgress(80, 'Selecting artists to study…');
+    // artists: 6-8 cards
+    const artistsData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
+
+Admired artists listed by user: ${admiredArtists||'none'}.
+
+Return JSON:
+{"intro":"1-2 sentence selection rationale","artists":[{"name":"Full name","focus":"4-7 word focus","description":"2 sentences on what to study and why it connects to this residency","isAdmired":false}]}
+
+Generate 6-8 real established artists. Include ALL admired artists with isAdmired:true. Fill remaining slots with complementary ${medium} artists relevant to: ${goals.join(', ')}. Keep descriptions to 2 short sentences.`,
+      1600
+    );
+
+    setProgress(91, 'Compiling books and resources…');
+    // resources: 5-6 books + 4-5 online
+    const resourcesData = await callClaude(
+      `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
+
+Existing resources: ${existingResources||'none'}. Budget: ${budget||'unspecified'}.
+
+Return JSON:
+{"intro":"1-2 sentence resource philosophy","books":[{"title":"Book Title — Author Name","meta":"Category · Focus","why":"1-2 sentences on relevance and when to read","alreadyOwned":false}],"online":[{"title":"Resource name","meta":"Type · Platform","why":"1-2 sentences on relevance","alreadyOwned":false,"free":true}],"budgetNote":"1-2 sentences on spending priorities given the budget"}
+
+Generate 5 real published books and 4 online resources for ${medium}. Set alreadyOwned:true where the artist likely has it. Mark free:true where applicable.`,
+      1600
+    );
+
+    setProgress(98, 'Putting it all together…');
+
+    buildApp(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, {
+      startDate, endDate, startLabel, endLabel, totalWeeks, budget
+    });
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('generate-btn').disabled = false;
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('intake-screen').style.display = 'flex';
+    document.getElementById('generate-btn').disabled = false;
+    errorEl.textContent = err.message || 'Something went wrong generating your plan. Please try again.';
+    errorEl.style.display = 'block';
+  }
+}
+
+// ── Build app ──
+function buildApp(phases, schedule, projects, rhythm, artists, resources, meta) {
+  const yr = meta.startDate.split('-')[0];
+  document.getElementById('title-year').textContent = yr;
+  document.getElementById('site-meta-line').textContent = `${meta.startLabel} – ${meta.endLabel} · ${phases.tagline}`;
+  document.getElementById('print-title').textContent = `Creative Residency ${yr} — Weekly Schedule`;
+  document.getElementById('print-sub').textContent = phases.tagline;
+
+  window._phaseNames = {};
+  phases.phases.forEach((p,i) => { window._phaseNames[i+1] = `Phase ${i+1} — ${p.name}`; });
+
+  buildPhaseBar(phases.phases);
+  buildOverview(phases, meta);
+  buildSchedule(schedule);
+  buildProjects(projects);
+  buildRhythm(rhythm);
+  buildArtists(artists);
+  buildResources(resources, meta);
+}
+
+function buildPhaseBar(phases) {
+  document.getElementById('phase-bar-inner').innerHTML = phases.map((p,i) => `
+    <div class="ph${i===0?' active':''}" onclick="selectPhase(${i})">
+      <div class="ph-label">Phase ${i+1}</div>
+      <div class="ph-name">${esc(p.name)}</div>
+      <div class="ph-dates">${esc(p.dates)}</div>
+    </div>`).join('');
+}
+
+function buildOverview(data, meta) {
+  const cards = data.phases.map((p,i) => `
+    <div class="phase-card">
+      <div class="phase-eyebrow">Phase ${i+1}</div>
+      <h3>${esc(p.name)}</h3>
+      <div class="phase-dates">${esc(p.dates)} (${esc(p.duration)})</div>
+      <p class="phase-body">${esc(p.description)}</p>
+      <div class="tag-row">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('overview').innerHTML = `
+    <p class="section-intro">${esc(data.intro)}</p>
+    <div class="phase-grid">${cards}</div>`;
+}
+
+function buildSchedule(data) {
+  const weeks = data.weeks.map(w => {
+    const days = w.days.map(d => `
+      <div class="day-row">
+        <div class="day-label">${esc(d.label)}</div>
+        <div class="day-content${d.content&&d.content.toLowerCase().includes('blackout')?' blackout-day':''}" contenteditable="true" spellcheck="false">${esc(d.content)}</div>
+      </div>`).join('');
+    return `
+      <div class="week-card" data-phase="${w.phase}">
+        <div class="week-header">
+          <div><div class="week-title">${esc(w.title)}</div><div class="week-range">${esc(w.range)}</div></div>
+          <span class="week-badge ${PHASE_COLORS[w.phase-1]}">Phase ${w.phase}</span>
+        </div>
+        ${days}
+        <div class="edit-hint">Click any day to edit</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('schedule').innerHTML = `
+    <p class="section-intro">A week-by-week breakdown. Click any day's text to edit it inline. Click a phase above to filter to that phase only.</p>
+    <div class="schedule-actions">
+      <div class="filter-banner" id="filter-banner">
+        <span>Showing <strong id="filter-label"></strong> only</span>
+        <button class="filter-clear" onclick="clearFilter()">Show all weeks</button>
+      </div>
+      <button class="print-btn" onclick="printSchedule()">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print schedule
+      </button>
+    </div>
+    <div class="week-grid" id="week-grid">${weeks}</div>`;
+
+}
+
+function buildProjects(data) {
+  const cards = data.projects.map(p => `
+    <div class="project-card">
+      <div class="project-title">${esc(p.title)}</div>
+      <p class="project-body">${esc(p.description)}</p>
+      <div class="tag-row">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}<span class="tag">${esc(p.phases)}</span></div>
+    </div>`).join('');
+  document.getElementById('projects').innerHTML = `<p class="section-intro">${esc(data.intro)}</p><div class="project-grid">${cards}</div>`;
+}
+
+function buildRhythm(data) {
+  const slots = data.slots.map(s => `
+    <div class="rhythm-card">
+      <div class="rhythm-time">${esc(s.time)}</div>
+      <div class="rhythm-label">${esc(s.label)}</div>
+      <div class="rhythm-items">${s.items.map(i=>esc(i)).join('<br>')}</div>
+    </div>`).join('');
+  document.getElementById('rhythm').innerHTML = `
+    <p class="section-intro">${esc(data.intro)}</p>
+    <div class="rhythm-grid">${slots}</div>
+    <div class="info-box"><h4>${esc(data.accountabilityTitle)}</h4><p>${esc(data.accountability)}</p></div>`;
+}
+
+function buildArtists(data) {
+  const cards = data.artists.map(a => `
+    <div class="artist-card">
+      ${a.isAdmired ? '<div class="artist-admired-badge">Artist you listed</div>' : ''}
+      <div class="artist-name">${esc(a.name)}</div>
+      <div class="artist-focus">${esc(a.focus)}</div>
+      <p class="artist-body">${esc(a.description)}</p>
+    </div>`).join('');
+  document.getElementById('artists').innerHTML = `<p class="section-intro">${esc(data.intro)}</p><div class="artist-grid">${cards}</div>`;
+}
+
+function buildResources(data, meta) {
+  const books = data.books.map(r => `
+    <div class="resource-item">
+      <div class="resource-title">${esc(r.title)}${r.alreadyOwned?'<span class="resource-owned">You have this</span>':''}</div>
+      <div class="resource-meta">${esc(r.meta)}</div>
+      <p class="resource-why">${esc(r.why)}</p>
+    </div>`).join('');
+  const online = data.online.map(r => `
+    <div class="resource-item">
+      <div class="resource-title">${esc(r.title)}${r.free?'<span class="resource-owned" style="background:var(--warm-lt);color:#3D6642;">Free</span>':''}${r.alreadyOwned?'<span class="resource-owned">You have this</span>':''}</div>
+      <div class="resource-meta">${esc(r.meta)}</div>
+      <p class="resource-why">${esc(r.why)}</p>
+    </div>`).join('');
+
+  document.getElementById('resources').innerHTML = `
+    <p class="section-intro">${esc(data.intro)}</p>
+    ${data.budgetNote ? `<div class="info-box"><h4>Budget guidance</h4><p>${esc(data.budgetNote)}</p></div>` : ''}
+    <div class="resource-group" style="margin-top:1.5rem"><h3>Books</h3>${books}</div>
+    <div class="resource-group"><h3>Online resources</h3>${online}</div>`;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+
+
+// ── ACCESS GATE ────────────────────────────────────────────
+const GATE_KEY_STORAGE = 'cr_access_key';
+
+// Add your valid keys here — test keys and any future real keys
+const VALID_KEYS = [
+  'TEST-2026',
+  'MAKER-2026',
+  'CREATIVE-BETA',
+];
+
+function checkKey() {
+  const input = document.getElementById('gate-key-input');
+  const err   = document.getElementById('gate-error');
+  const key   = input.value.trim().toUpperCase();
+
+  err.style.display = 'none';
+  if (!key) { showGateError('Please enter your access key.'); return; }
+
+  if (VALID_KEYS.includes(key)) {
+    localStorage.setItem(GATE_KEY_STORAGE, key);
+    openApp();
+  } else {
+    showGateError("That key wasn't recognized. Check your email receipt or contact brittonclarkceramics@gmail.com.");
+    input.value = '';
+    input.focus();
+  }
+}
+
+function showGateError(msg) {
+  const el = document.getElementById('gate-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function openApp() {
+  document.getElementById('gate-screen').style.display = 'none';
+  document.getElementById('intake-screen').style.display = 'flex';
+}
+
+function initGate() {
+  // If already unlocked, skip gate
+  const stored = localStorage.getItem(GATE_KEY_STORAGE);
+  if (stored && VALID_KEYS.includes(stored)) {
+    document.getElementById('gate-screen').style.display = 'none';
+    document.getElementById('intake-screen').style.display = 'flex';
+  }
+}
+
+// Enter key support + auto-uppercase
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('gate-key-input');
+  if (input) {
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') checkKey(); });
+    input.addEventListener('input', () => { input.value = input.value.toUpperCase(); });
+  }
+  initGate();
+});
+
+setupChips();
+</script>
+<footer class="site-footer">
+  Your Creative Residency
+  <span class="footer-dot">&middot;</span>
+  Made for Makers
+  <span class="footer-dot">&middot;</span>
+  Created by Britton Clark
+  <span class="footer-dot">&middot;</span>
+  <a href="mailto:brittonclarkceramics@gmail.com">brittonclarkceramics@gmail.com</a>
+</footer>
+</body>
+</html>

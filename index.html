@@ -554,19 +554,21 @@ function setProgress(pct, msg) {
 }
 
 // ── API ──
+const WORKER_URL = 'https://creative-residency.britton-a-clark.workers.dev';
+
 async function callClaude(prompt, maxTokens = 1200, system) {
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const resp = await fetch(WORKER_URL + '/generate', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-6',
-      max_tokens: maxTokens,
+      licenseKey: localStorage.getItem(GATE_KEY_STORAGE) || 'TEST-2026',
+      prompt,
+      maxTokens,
       system: system || 'You are a helpful assistant. Respond ONLY with valid JSON. No markdown fences, no preamble, no explanation. Keep string values concise — 1-2 sentences max unless specified otherwise.',
-      messages:[{role:'user',content:prompt}]
     })
   });
   const data = await resp.json();
-  if (data.error) throw new Error(data.error.message || 'API error');
+  if (data.error) throw new Error(data.error);
   if (data.stop_reason === 'max_tokens') {
     throw new Error('Response was cut off — please try again. If this keeps happening, shorten your technique or resource descriptions.');
   }

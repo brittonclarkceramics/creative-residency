@@ -278,6 +278,7 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
 
 
 
+.loading-note { font-size:12px; color:var(--ink-3); text-align:center; margin-top:0.5rem; font-style:italic; opacity:0.8; }
 .loading-steps { display:flex; flex-direction:column; gap:8px; margin:0.5rem 0 1rem; width:260px; }
 .load-step { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-3); transition:color 0.3s; }
 .load-step.active { color:var(--ink); }
@@ -460,8 +461,8 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
   <div class="intake-step-panel active" id="step-panel-1">
     <div class="intake-panel-head">
       <p class="intake-panel-eyebrow">Step 1 of 3</p>
-      <h2 class="intake-panel-title">Tell us about your practice</h2>
-      <p class="intake-panel-sub">Your medium, skill level, and what you're working toward. This shapes everything the AI generates for you.</p>
+      <h2 class="intake-panel-title">Share how you like to create</h2>
+      <p class="intake-panel-sub">Tell us about your medium, what you're drawn to, and where you want to grow. The more you share, the more your plan will feel like it was made just for you.</p>
     </div>
 
     <div class="intake-field">
@@ -653,6 +654,7 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
   </div>
   <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
   <div class="loading-status" id="loading-status">Starting…</div>
+  <div class="loading-note">This usually takes 2–3 minutes — your plan is worth the wait.</div>
 </div>
 
 <!-- ══════════════ APP ══════════════ -->
@@ -934,7 +936,7 @@ async function startGeneration() {
   ];
 
   try {
-    setProgress(15, 'Designing your four phases…', 1);
+    setProgress(15, 'Laying out the arc of your practice…', 1);
     // phases: 4 objects, short strings — 800 tokens is plenty
     const phasesData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist running ${startLabel} to ${endLabel}. Context: ${context}
@@ -952,7 +954,7 @@ Tags should be specific techniques or activities relevant to ${medium}, not gene
       800
     );
 
-    setProgress(35, 'Building your weekly schedule…', 2);
+    setProgress(35, 'Filling in the calendar, week by week…', 2);
     // schedule: up to 16 week objects, each with 2 day rows — needs the most tokens
     const numWeekEntries = Math.min(Math.ceil(totalWeeks / 1.2), 14);
     const scheduleData = await callClaude(
@@ -969,7 +971,7 @@ Generate ${numWeekEntries} entries total. Group middle weeks into pairs (e.g. "W
       3500
     );
 
-    setProgress(52, 'Identifying project threads…', 3);
+    setProgress(52, 'Finding the through-lines in your work…', 3);
     // projects: 5-6 objects with short descriptions
     const projectsData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -981,7 +983,7 @@ Generate 5 project threads specific to ${medium}. Prioritize existing resources:
       1400
     );
 
-    setProgress(67, 'Mapping daily rhythm…', 4);
+    setProgress(67, 'Figuring out when the magic happens…', 4);
     // rhythm: 4 time slots, short item lists
     const rhythmData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -993,7 +995,7 @@ Generate 4 time slots for: ${time}. 3 items per slot max. Items specific to ${me
       900
     );
 
-    setProgress(80, 'Selecting artists to study…', 5);
+    setProgress(80, 'Curating your creative influences…', 5);
     // artists: 6-8 cards
     const artistsData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -1007,7 +1009,7 @@ Generate 6-8 real established artists. Include ALL admired artists with isAdmire
       1600
     );
 
-    setProgress(91, 'Compiling books and resources…', 6);
+    setProgress(91, 'Scouring the shelves for the good stuff…', 6);
     // resources: 5-6 books + 4-5 online
     const resourcesData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -1021,7 +1023,7 @@ Generate 5 real published books and 4 online resources for ${medium}. Set alread
       1600
     );
 
-    setProgress(100, 'All done — building your plan…', 6);
+    setProgress(100, 'Putting it all together — almost there…', 6);
 
     const planMeta = { startDate, endDate, startLabel, endLabel, totalWeeks, budget, medium, studioDays, blockedFrom, blockedTo, blackouts };
     saveCurrentPlan(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, planMeta);

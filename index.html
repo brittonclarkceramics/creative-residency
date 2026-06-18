@@ -772,8 +772,8 @@ async function startGeneration() {
   const startDate = document.getElementById('start-date').value;
   const endDate   = document.getElementById('end-date').value;
   const blackouts = getBlackouts();
-  const errorEl   = document.getElementById('intake-error');
-  errorEl.style.display = 'none';
+  const errorEl   = document.getElementById('step3-error');
+  if (errorEl) errorEl.style.display = 'none';
 
   // Validation handled per-step in intakeNext()
   if (!mediums.length || !level || !time || goals.length===0) {

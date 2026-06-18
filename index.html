@@ -13,28 +13,86 @@
   --ink:#2C2420; --ink-2:#524740; --ink-3:#8A7E76;
   --paper:#FBF8F4; --paper-2:#F5EFE7; --paper-3:#EDE4D8; --rule:#DDD4C8;
   --accent:#B85C38; --accent-2:#D4845A; --accent-lt:#FAEEE8;
-  --warm:#6B8F71; --warm-lt:#EAF2EB; --sky:#5B7FA6; --sky-lt:#EBF1F8; --radius:6px; --max:900px;
+  --warm:#6B8F71; --warm-lt:#EAF2EB; --sky:#5B7FA6; --sky-lt:#EBF1F8;
+  --radius:8px; --max:900px;
 }
 body { font-family:'DM Sans',system-ui,sans-serif; background:var(--paper); color:var(--ink); font-size:15px; line-height:1.65; min-height:100vh; }
 
-/* ── INTAKE ── */
-#intake-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:3rem 2rem; }
-.intake-box { width:100%; max-width:680px; }
-.intake-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,42px); font-weight:400; line-height:1.15; margin-bottom:6px; }
-.intake-wordmark em { font-style:italic; color:var(--accent); }
-.intake-sub { font-size:15px; color:var(--ink-3); margin-bottom:2.5rem; padding-bottom:2rem; border-bottom:1px solid var(--rule); }
-.intake-section-head { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-3); margin:2.25rem 0 1.25rem; padding-bottom:8px; border-bottom:1px solid var(--rule); }
-.intake-step { margin-bottom:1.5rem; }
-.intake-label { display:block; font-size:13px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-2); margin-bottom:8px; }
-.intake-label span { font-weight:400; color:var(--ink-3); text-transform:none; letter-spacing:0; font-size:12px; margin-left:6px; }
-.chip-row { display:flex; flex-wrap:wrap; gap:8px; }
-.chip { padding:7px 14px; border-radius:100px; border:1px solid var(--rule); background:#fff; font-size:13px; color:var(--ink-2); cursor:pointer; transition:all 0.12s; font-family:inherit; user-select:none; }
-.chip:hover { border-color:var(--accent-2); color:var(--accent); }
-.chip.selected { background:var(--accent); border-color:var(--accent); color:#fff; }
-.intake-input { width:100%; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; height:40px; }
+/* ══ GATE SCREEN ══════════════════════════════════════════ */
+#gate-screen {
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:2rem;
+  background: radial-gradient(ellipse at 60% 40%, #FAEEE8 0%, #FBF8F4 60%);
+}
+#gate-screen.hidden { display:none; }
+#intake-screen.hidden { display:none; }
+.gate-box { width:100%; max-width:480px; text-align:center; }
+.gate-eyebrow { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-2); margin-bottom:16px; }
+.gate-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(32px,6vw,52px); font-weight:400; line-height:1.1; margin-bottom:12px; color:var(--ink); }
+.gate-wordmark em { font-style:italic; color:var(--accent); }
+.gate-value { font-size:14px; color:var(--ink-3); margin-bottom:2.5rem; line-height:1.8; max-width:360px; margin-left:auto; margin-right:auto; }
+.gate-card { background:#fff; border:1px solid var(--rule); border-radius:12px; padding:2rem; margin-bottom:1.25rem; box-shadow:0 2px 16px rgba(44,36,32,0.06); }
+.gate-card-label { font-size:12px; font-weight:500; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+.gate-input-wrap { display:flex; gap:8px; }
+.gate-input { flex:1; border:1.5px solid var(--rule); border-radius:var(--radius); background:var(--paper); padding:11px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; letter-spacing:0.06em; text-transform:uppercase; }
+.gate-input:focus { border-color:var(--accent); background:#fff; }
+.gate-input::placeholder { color:var(--ink-3); letter-spacing:0; text-transform:none; }
+.gate-btn { padding:11px 22px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.15s, transform 0.1s; }
+.gate-btn:hover { background:#9E4A2A; transform:translateY(-1px); }
+.gate-btn:active { transform:translateY(0); }
+.gate-error { font-size:13px; color:#991B1B; background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:10px 14px; margin-top:10px; display:none; line-height:1.6; text-align:left; }
+.gate-links { font-size:12px; color:var(--ink-3); line-height:2; }
+.gate-links a { color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-lt); padding-bottom:1px; transition:border-color 0.15s; }
+.gate-links a:hover { border-color:var(--accent); }
+.gate-divider { border:none; border-top:1px solid var(--rule); margin:1rem 0; }
+
+/* ══ INTAKE — STEPPED FORM ════════════════════════════════ */
+#intake-screen { min-height:100vh; display:none; flex-direction:column; align-items:center; padding:0; background:var(--paper); }
+
+.intake-progress-bar {
+  width:100%; background:#fff; border-bottom:1px solid var(--rule);
+  padding:0 2rem; position:sticky; top:0; z-index:20;
+}
+.intake-progress-inner {
+  max-width:680px; margin:0 auto; display:flex; align-items:center;
+  justify-content:space-between; padding:14px 0;
+}
+.intake-progress-steps { display:flex; align-items:center; gap:0; }
+.prog-step {
+  display:flex; align-items:center; gap:8px; font-size:12px; font-weight:500;
+  color:var(--ink-3); padding:6px 12px; border-radius:100px;
+  transition:color 0.2s, background 0.2s;
+}
+.prog-step.active { color:var(--accent); background:var(--accent-lt); }
+.prog-step.done { color:var(--warm); }
+.prog-step-num {
+  width:20px; height:20px; border-radius:50%; border:1.5px solid currentColor;
+  display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0;
+}
+.prog-step.done .prog-step-num { background:var(--warm); border-color:var(--warm); color:#fff; }
+.prog-connector { width:24px; height:1px; background:var(--rule); }
+.intake-progress-title { font-family:'DM Serif Display',serif; font-size:15px; color:var(--ink-3); font-weight:400; }
+
+.intake-step-panel { display:none; width:100%; max-width:680px; margin:0 auto; padding:2.5rem 2rem 6rem; }
+.intake-step-panel.active { display:block; }
+
+.intake-panel-head { margin-bottom:2rem; }
+.intake-panel-eyebrow { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-2); margin-bottom:8px; }
+.intake-panel-title { font-family:'DM Serif Display',serif; font-size:clamp(22px,4vw,32px); font-weight:400; line-height:1.2; margin-bottom:8px; }
+.intake-panel-sub { font-size:14px; color:var(--ink-3); line-height:1.75; }
+
+.intake-field { margin-bottom:1.75rem; }
+.intake-label { display:block; font-size:15px; font-weight:500; color:var(--ink-2); margin-bottom:10px; }
+.intake-label span { font-weight:400; color:var(--ink-3); font-size:13px; margin-left:8px; }
+.chip-row { display:flex; flex-wrap:wrap; gap:7px; }
+.chip { padding:8px 16px; border-radius:100px; border:1.5px solid var(--rule); background:#fff; font-size:13px; color:var(--ink-2); cursor:pointer; transition:all 0.12s; font-family:inherit; user-select:none; }
+.chip:hover { border-color:var(--warm); color:var(--warm); background:var(--warm-lt); }
+.chip.selected { background:var(--warm); border-color:var(--warm); color:#fff; }
+
+.intake-input { width:100%; border:1.5px solid var(--rule); border-radius:var(--radius); background:#fff; padding:11px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; }
 .intake-input:focus { border-color:var(--accent-2); }
 .intake-input::placeholder { color:var(--ink-3); }
-.intake-textarea { width:100%; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:12px 14px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; min-height:80px; line-height:1.6; outline:none; transition:border-color 0.15s; }
+.intake-textarea { width:100%; border:1.5px solid var(--rule); border-radius:var(--radius); background:#fff; padding:12px 14px; font-family:inherit; font-size:14px; color:var(--ink); resize:vertical; min-height:88px; line-height:1.6; outline:none; transition:border-color 0.15s; }
 .intake-textarea:focus { border-color:var(--accent-2); }
 .intake-textarea::placeholder { color:var(--ink-3); }
 .date-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -42,129 +100,230 @@ body { font-family:'DM Sans',system-ui,sans-serif; background:var(--paper); colo
 
 /* blackout builder */
 .blackout-list { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
-.blackout-entry { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:10px 12px; }
-.blackout-entry input, .blackout-entry select { border:1px solid var(--rule); border-radius:4px; background:var(--paper); padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; width:100%; }
+.blackout-entry { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; align-items:center; background:#fff; border:1.5px solid var(--rule); border-radius:var(--radius); padding:10px 12px; }
+.blackout-entry input, .blackout-entry select { border:1px solid var(--rule); border-radius:4px; background:var(--paper); padding:7px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; width:100%; transition:border-color 0.15s; }
 .blackout-entry input:focus, .blackout-entry select:focus { border-color:var(--accent-2); }
-.blackout-entry .remove-btn { background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:18px; line-height:1; padding:2px 4px; border-radius:3px; font-family:inherit; }
-.blackout-entry .remove-btn:hover { color:var(--warm); background:var(--warm-lt); }
-.add-blackout-btn { background:none; border:1px dashed var(--rule); border-radius:var(--radius); padding:8px 14px; font-family:inherit; font-size:13px; color:var(--ink-3); cursor:pointer; width:100%; transition:all 0.12s; }
-.add-blackout-btn:hover { border-color:var(--accent-2); color:var(--accent); background:var(--accent-lt); }
+.blackout-entry .remove-btn { background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; border-radius:4px; font-family:inherit; transition:all 0.12s; }
+.blackout-entry .remove-btn:hover { color:#8C3030; background:#FEF2F2; }
 .blackout-col-heads { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; padding:0 12px; margin-bottom:4px; }
 .blackout-col-heads span { font-size:11px; color:var(--ink-3); font-weight:500; }
+.add-blackout-btn { background:none; border:1.5px dashed var(--rule); border-radius:var(--radius); padding:9px 14px; font-family:inherit; font-size:13px; color:var(--ink-3); cursor:pointer; width:100%; transition:all 0.12s; }
+.add-blackout-btn:hover { border-color:var(--accent-2); color:var(--accent); background:var(--accent-lt); }
 
-.generate-btn { width:100%; padding:14px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; margin-top:0.5rem; transition:background 0.15s,opacity 0.15s; }
-.generate-btn:hover { background:#9E4A2A; }
-.generate-btn:disabled { opacity:0.5; cursor:not-allowed; }
+/* intake nav buttons */
+.intake-nav { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--rule); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; z-index:20; }
+.intake-nav-inner { max-width:680px; margin:0 auto; width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.btn-back { background:none; border:1.5px solid var(--rule); border-radius:var(--radius); padding:10px 20px; font-family:inherit; font-size:14px; font-weight:500; color:var(--ink-2); cursor:pointer; transition:all 0.12s; }
+.btn-back:hover { border-color:var(--ink-3); background:var(--paper-2); }
+.btn-back:disabled { opacity:0.3; cursor:not-allowed; }
+.btn-next { background:var(--accent); color:#fff; border:none; border-radius:var(--radius); padding:10px 28px; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.15s, transform 0.1s; }
+.btn-next:hover { background:#9E4A2A; transform:translateY(-1px); }
+.btn-next:active { transform:translateY(0); }
+.btn-next:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.intake-step-hint { font-size:12px; color:var(--ink-3); }
 .error-box { background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:1rem 1.25rem; font-size:13px; color:#991B1B; margin-top:1rem; line-height:1.65; }
 
-/* ── LOADING ── */
-#loading-screen { display:none; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:1.5rem; padding:2rem; }
-.loading-title { font-family:'DM Serif Display',serif; font-size:24px; font-weight:400; color:var(--ink); text-align:center; }
-.loading-status { font-size:14px; color:var(--ink-3); text-align:center; max-width:360px; line-height:1.7; }
-.loading-bar-wrap { width:240px; height:3px; background:var(--paper-3); border-radius:2px; overflow:hidden; }
-.loading-bar { height:100%; background:var(--accent); border-radius:2px; width:0%; transition:width 0.4s ease; }
+/* ══ LOADING ════════════════════════════════════════════════ */
+#loading-screen { display:none; min-height:100vh; align-items:center; justify-content:center; flex-direction:column; gap:1.5rem; padding:2rem; background:var(--paper); }
+.loading-wordmark { font-family:'DM Serif Display',serif; font-size:28px; font-weight:400; color:var(--ink); text-align:center; margin-bottom:0.5rem; }
+.loading-wordmark em { font-style:italic; color:var(--accent); }
+.loading-status { font-size:14px; color:var(--ink-3); text-align:center; max-width:320px; line-height:1.7; min-height:44px; }
+.loading-bar-wrap { width:200px; height:2px; background:var(--paper-3); border-radius:2px; overflow:hidden; }
+.loading-bar { height:100%; background:var(--accent); border-radius:2px; width:0%; transition:width 0.5s ease; }
+.loading-dots { display:flex; gap:6px; justify-content:center; }
+.loading-dot { width:7px; height:7px; border-radius:50%; background:var(--accent-lt); animation:dotpulse 1.4s ease-in-out infinite; }
+.loading-dot:nth-child(2) { animation-delay:0.2s; }
+.loading-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes dotpulse { 0%,80%,100%{background:var(--accent-lt);transform:scale(0.9)} 40%{background:var(--accent);transform:scale(1.15)} }
 
-/* ── APP ── */
+/* ══ APP SHELL ══════════════════════════════════════════════ */
 #app-screen { display:none; }
-.site-header { background:var(--accent); color:#fff; padding:2rem 2rem 1.75rem; }
-.site-header-inner { max-width:var(--max); margin:0 auto; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
-.site-title { font-family:'DM Serif Display',serif; font-size:clamp(22px,3.5vw,32px); font-weight:400; line-height:1.2; margin-bottom:4px; }
-.site-title em { font-style:italic; opacity:0.6; }
-.site-meta { font-size:12px; opacity:0.5; letter-spacing:0.04em; text-transform:uppercase; }
-.header-btns { display:flex; gap:8px; flex-shrink:0; }
-.restart-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:var(--radius); color:rgba(255,255,255,0.7); font-family:inherit; font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
-.restart-btn:hover { background:rgba(255,255,255,0.18); }
-.phase-bar { background:#9E4A2A; padding:0 2rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.08); }
-.phase-inner { max-width:var(--max); margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-.ph { background:rgba(255,255,255,0.07); border:1.5px solid transparent; border-radius:var(--radius); padding:8px 10px; cursor:pointer; transition:background 0.15s; }
-.ph:hover { background:rgba(255,255,255,0.13); }
-.ph.active { background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.35); }
-.ph-label { font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.4); margin-bottom:2px; }
-.ph-name { font-size:12px; font-weight:500; color:#fff; line-height:1.3; margin-bottom:3px; }
-.ph-dates { font-size:11px; color:rgba(255,255,255,0.4); }
-.nav-bar { background:var(--paper-2); border-bottom:1px solid var(--rule); padding:0 2rem; position:sticky; top:0; z-index:10; }
-.nav-inner { max-width:var(--max); margin:0 auto; display:flex; overflow-x:auto; gap:0; }
-.nav-inner button { background:none; border:none; border-bottom:2.5px solid transparent; padding:13px 16px; font-size:13px; font-weight:500; color:var(--ink-3); cursor:pointer; white-space:nowrap; transition:color 0.15s,border-color 0.15s; font-family:inherit; }
+.site-header { background:var(--accent); color:#fff; padding:1.5rem 2rem 0; }
+.site-header-inner { max-width:var(--max); margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.15); }
+.site-title { font-family:'DM Serif Display',serif; font-size:clamp(18px,3vw,26px); font-weight:400; line-height:1.2; }
+.site-title em { font-style:italic; opacity:0.65; }
+.site-meta { font-size:11px; opacity:0.55; letter-spacing:0.04em; text-transform:uppercase; margin-top:2px; }
+.header-btns { display:flex; gap:8px; flex-shrink:0; align-items:center; }
+.restart-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); border-radius:var(--radius); color:rgba(255,255,255,0.8); font-family:inherit; font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+.restart-btn:hover { background:rgba(255,255,255,0.2); }
+
+/* Phase nav — integrated into header */
+.phase-nav { max-width:var(--max); margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; padding-top:1px; }
+.ph { background:rgba(255,255,255,0.0); border:none; border-top:3px solid transparent; padding:10px 10px 12px; cursor:pointer; transition:all 0.15s; text-align:left; font-family:inherit; }
+.ph:hover { background:rgba(255,255,255,0.08); }
+.ph.active { border-top-color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.1); }
+.ph-label { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.45); margin-bottom:3px; }
+.ph-name { font-size:12px; font-weight:500; color:#fff; line-height:1.3; margin-bottom:2px; }
+.ph-dates { font-size:10px; color:rgba(255,255,255,0.45); }
+
+/* Tab nav */
+.nav-bar { background:#fff; border-bottom:1px solid var(--rule); padding:0 2rem; position:sticky; top:0; z-index:10; box-shadow:0 1px 3px rgba(44,36,32,0.06); }
+.nav-inner { max-width:var(--max); margin:0 auto; display:flex; overflow-x:auto; }
+.nav-inner button { background:none; border:none; border-bottom:2.5px solid transparent; padding:14px 16px; font-size:13px; font-weight:500; color:var(--ink-3); cursor:pointer; white-space:nowrap; transition:color 0.15s,border-color 0.15s; font-family:inherit; }
 .nav-inner button:hover { color:var(--ink); }
 .nav-inner button.active { color:var(--accent); border-bottom-color:var(--accent); }
-main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
+
+/* Main content */
+main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
 .tab { display:none; }
 .tab.active { display:block; }
-.section-intro { font-size:15px; color:var(--ink-3); line-height:1.8; max-width:600px; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--rule); }
-.phase-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:2rem; }
-.phase-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; border-top:3px solid var(--accent); }
-.phase-card:nth-child(2) { border-top-color:var(--warm); }
-.phase-card:nth-child(3) { border-top-color:var(--sky); }
-.phase-card:nth-child(4) { border-top-color:var(--ink-2); }
-.phase-eyebrow { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); margin-bottom:6px; }
+.section-intro { font-size:15px; color:var(--ink-3); line-height:1.85; max-width:580px; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--rule); }
+
+/* Phase cards */
+.phase-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-bottom:2rem; }
+.phase-card { background:#fff; border:1px solid var(--rule); border-radius:10px; padding:1.5rem; position:relative; overflow:hidden; transition:box-shadow 0.15s; }
+.phase-card:hover { box-shadow:0 4px 16px rgba(44,36,32,0.08); }
+.phase-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent); }
+.phase-card:nth-child(2)::before { background:var(--warm); }
+.phase-card:nth-child(3)::before { background:var(--sky); }
+.phase-card:nth-child(4)::before { background:var(--ink-2); }
+.phase-eyebrow { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); margin-bottom:8px; }
 .phase-card:nth-child(2) .phase-eyebrow { color:var(--warm); }
 .phase-card:nth-child(3) .phase-eyebrow { color:var(--sky); }
 .phase-card:nth-child(4) .phase-eyebrow { color:var(--ink-2); }
-.phase-card h3 { font-family:'DM Serif Display',serif; font-size:18px; font-weight:400; margin-bottom:4px; line-height:1.3; }
-.phase-dates { font-size:12px; color:var(--ink-3); margin-bottom:10px; }
-.phase-body { font-size:13px; color:var(--ink-3); line-height:1.75; margin-bottom:12px; }
+.phase-card h3 { font-family:'DM Serif Display',serif; font-size:19px; font-weight:400; margin-bottom:4px; line-height:1.3; }
+.phase-dates { font-size:12px; color:var(--ink-3); margin-bottom:12px; }
+.phase-body { font-size:13px; color:var(--ink-3); line-height:1.8; margin-bottom:14px; }
 .tag-row { display:flex; flex-wrap:wrap; gap:5px; }
-.tag { font-size:11px; padding:3px 8px; border-radius:3px; border:1px solid var(--rule); color:var(--ink-3); background:var(--paper); }
-.filter-banner { display:none; align-items:center; justify-content:space-between; background:var(--accent-lt); border:1px solid #F0C9B8; border-radius:var(--radius); padding:10px 14px; margin-bottom:1.5rem; font-size:13px; color:var(--accent); }
+.tag { font-size:11px; padding:3px 9px; border-radius:4px; border:1px solid var(--rule); color:var(--ink-3); background:var(--paper); }
+
+/* Schedule */
+.filter-banner { display:none; align-items:center; justify-content:space-between; background:var(--accent-lt); border:1px solid #F0C9B8; border-radius:var(--radius); padding:10px 14px; font-size:13px; color:var(--accent); }
 .filter-banner.visible { display:flex; }
 .filter-clear { background:none; border:1px solid #F0C9B8; border-radius:var(--radius); padding:4px 10px; font-size:12px; font-weight:500; color:var(--accent); cursor:pointer; font-family:inherit; }
 .filter-clear:hover { background:rgba(184,92,56,0.08); }
 .week-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
-.week-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
+.week-card { background:#fff; border:1px solid var(--rule); border-radius:10px; padding:1.25rem; transition:box-shadow 0.15s; }
+.week-card:hover { box-shadow:0 2px 12px rgba(44,36,32,0.07); }
 .week-card.hidden { display:none; }
 .week-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--rule); }
 .week-title { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; }
 .week-range { font-size:12px; color:var(--ink-3); margin-top:2px; }
-.week-badge { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; padding:3px 8px; border-radius:3px; white-space:nowrap; }
+.week-badge { font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; padding:3px 8px; border-radius:4px; white-space:nowrap; }
 .badge-p1 { background:var(--accent-lt); color:var(--accent); }
 .badge-p2 { background:var(--warm-lt); color:#3D6642; }
 .badge-p3 { background:var(--sky-lt); color:var(--sky); }
 .badge-p4 { background:#EDEAE5; color:var(--ink-2); }
-.day-row { display:grid; grid-template-columns:64px 1fr; gap:8px; padding:7px 0; border-top:1px solid var(--paper-2); align-items:start; }
-.day-label { font-size:12px; font-weight:500; color:var(--ink-3); padding-top:2px; }
-.day-content { font-size:13px; line-height:1.65; color:var(--ink-2); outline:none; border-radius:3px; padding:1px 4px; margin:-1px -4px; transition:background 0.1s; cursor:text; }
+.day-row { display:grid; grid-template-columns:60px 1fr; gap:8px; padding:8px 0; border-top:1px solid var(--paper-2); align-items:start; }
+.day-label { font-size:11px; font-weight:500; color:var(--ink-3); padding-top:3px; text-transform:uppercase; letter-spacing:0.04em; }
+.day-content { font-size:13px; line-height:1.65; color:var(--ink-2); outline:none; border-radius:4px; padding:2px 6px; margin:-2px -6px; transition:background 0.1s; cursor:text; }
 .day-content:hover { background:var(--paper); }
 .day-content:focus { background:var(--accent-lt); }
 .blackout-day { color:#8C3030; font-style:italic; }
-.edit-hint { font-size:11px; color:var(--ink-3); margin-top:12px; padding-top:10px; border-top:1px solid var(--paper-2); }
+.edit-hint { font-size:11px; color:var(--ink-3); margin-top:10px; padding-top:10px; border-top:1px solid var(--paper-2); opacity:0.7; }
 .schedule-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; gap:12px; }
-.print-btn { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:8px 16px; font-family:inherit; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; gap:6px; transition:background 0.12s,border-color 0.12s; flex-shrink:0; }
+.print-btn { background:#fff; border:1.5px solid var(--rule); border-radius:var(--radius); padding:8px 16px; font-family:inherit; font-size:13px; font-weight:500; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.12s; flex-shrink:0; }
 .print-btn:hover { background:var(--paper-2); border-color:var(--ink-3); }
-.print-btn svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
-.project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
-.project-card { background:#fff; border:1px solid var(--rule); border-top:3px solid var(--accent-2); border-radius:var(--radius); padding:1.25rem; }
-.project-title { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:8px; }
-.project-body { font-size:13px; color:var(--ink-3); line-height:1.75; margin-bottom:12px; }
-.rhythm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:1.5rem; }
-.rhythm-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
-.rhythm-time { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:4px; }
-.rhythm-label { font-size:12px; color:var(--ink-3); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--rule); }
-.rhythm-items { font-size:13px; color:var(--ink-3); line-height:2; }
-.artist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
-.artist-card { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1.25rem; }
-.artist-name { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:3px; }
-.artist-focus { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-2); margin-bottom:8px; }
-.artist-body { font-size:13px; color:var(--ink-3); line-height:1.7; }
-.artist-admired-badge { display:inline-block; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; background:var(--accent-lt); color:var(--accent); padding:2px 7px; border-radius:3px; margin-bottom:8px; }
-.resource-group { margin-bottom:2.5rem; }
-.resource-group h3 { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; margin-bottom:1rem; padding-bottom:8px; border-bottom:1px solid var(--rule); }
-.resource-item { padding:14px 0; border-bottom:1px solid var(--paper-2); }
-.resource-item:last-child { border-bottom:none; }
-.resource-title { font-size:14px; font-weight:500; color:var(--ink); }
-.resource-meta { font-size:12px; color:var(--accent-2); margin-bottom:4px; }
-.resource-why { font-size:13px; color:var(--ink-3); line-height:1.7; }
-.resource-owned { display:inline-block; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; background:var(--warm-lt); color:#3D6642; padding:2px 7px; border-radius:3px; margin-left:8px; vertical-align:middle; }
-.info-box { background:var(--paper-2); border-left:3px solid var(--accent); border-radius:0 var(--radius) var(--radius) 0; padding:1rem 1.25rem; margin-top:1.5rem; }
-.info-box h4 { font-size:13px; font-weight:500; margin-bottom:6px; color:var(--accent); }
-.info-box p { font-size:13px; color:var(--ink-3); line-height:1.75; }
-.budget-bar { background:#fff; border:1px solid var(--rule); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-.budget-label { font-size:13px; color:var(--ink-3); }
-.budget-amount { font-family:'DM Serif Display',serif; font-size:20px; color:var(--accent); }
+.print-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
 
-/* ── PRINT ── */
+/* Projects */
+.project-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+.project-card { background:#fff; border:1px solid var(--rule); border-radius:10px; padding:1.5rem; transition:box-shadow 0.15s; position:relative; overflow:hidden; }
+.project-card:hover { box-shadow:0 4px 16px rgba(44,36,32,0.08); }
+.project-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent-2); }
+.project-title { font-family:'DM Serif Display',serif; font-size:17px; font-weight:400; margin-bottom:8px; }
+.project-body { font-size:13px; color:var(--ink-3); line-height:1.8; margin-bottom:12px; }
+
+/* Rhythm */
+.rhythm-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:1.5rem; }
+.rhythm-card { background:#fff; border:1px solid var(--rule); border-radius:10px; padding:1.25rem; }
+.rhythm-time { font-family:'DM Serif Display',serif; font-size:18px; font-weight:400; margin-bottom:3px; }
+.rhythm-label { font-size:12px; color:var(--ink-3); margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--rule); }
+.rhythm-items { font-size:13px; color:var(--ink-3); line-height:2.1; }
+
+/* Artists */
+.artist-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+.artist-card { background:#fff; border:1px solid var(--rule); border-radius:10px; padding:1.5rem; transition:box-shadow 0.15s; }
+.artist-card:hover { box-shadow:0 2px 12px rgba(44,36,32,0.07); }
+.artist-name { font-family:'DM Serif Display',serif; font-size:18px; font-weight:400; margin-bottom:3px; }
+.artist-focus { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent-2); margin-bottom:10px; }
+.artist-body { font-size:13px; color:var(--ink-3); line-height:1.75; }
+.artist-admired-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; background:var(--accent-lt); color:var(--accent); padding:3px 8px; border-radius:4px; margin-bottom:10px; }
+
+/* Resources */
+.resource-group { margin-bottom:2.5rem; }
+.resource-group h3 { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; margin-bottom:1rem; padding-bottom:10px; border-bottom:1px solid var(--rule); }
+.resource-item { padding:16px 0; border-bottom:1px solid var(--paper-2); }
+.resource-item:last-child { border-bottom:none; }
+.resource-title { font-size:14px; font-weight:500; color:var(--ink); margin-bottom:3px; }
+.resource-meta { font-size:12px; color:var(--accent-2); margin-bottom:5px; }
+.resource-why { font-size:13px; color:var(--ink-3); line-height:1.75; }
+.resource-owned { display:inline-block; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; background:var(--warm-lt); color:#3D6642; padding:2px 7px; border-radius:4px; margin-left:8px; vertical-align:middle; }
+.info-box { background:var(--paper-2); border-left:3px solid var(--accent); border-radius:0 var(--radius) var(--radius) 0; padding:1.1rem 1.25rem; margin-top:1.5rem; }
+.info-box h4 { font-size:13px; font-weight:500; margin-bottom:6px; color:var(--accent); }
+.info-box p { font-size:13px; color:var(--ink-3); line-height:1.8; }
+
+/* Footer */
+.site-footer { background:var(--paper-3); border-top:1px solid var(--rule); padding:1.25rem 2rem; text-align:center; font-size:12px; color:var(--ink-3); letter-spacing:0.02em; }
+.site-footer a { color:var(--ink-3); text-decoration:none; border-bottom:1px solid var(--rule); transition:color 0.15s,border-color 0.15s; }
+.site-footer a:hover { color:var(--accent); border-bottom-color:var(--accent); }
+.site-footer .footer-dot { margin:0 8px; opacity:0.4; }
+
+
+/* ══ PLANS DRAWER ═══════════════════════════════════════════ */
+.drawer-overlay { position:fixed; inset:0; background:rgba(44,36,32,0.35); z-index:100; opacity:0; pointer-events:none; transition:opacity 0.25s; }
+.drawer-overlay.open { opacity:1; pointer-events:all; }
+.plans-drawer {
+  position:fixed; top:0; right:0; bottom:0; width:340px; max-width:90vw;
+  background:#fff; z-index:101; transform:translateX(100%);
+  transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  display:flex; flex-direction:column;
+  box-shadow:-4px 0 32px rgba(44,36,32,0.12);
+}
+.plans-drawer.open { transform:translateX(0); }
+.drawer-header {
+  padding:1.25rem 1.5rem; border-bottom:1px solid var(--rule);
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.drawer-title { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; }
+.drawer-close { background:none; border:none; font-size:22px; color:var(--ink-3); cursor:pointer; padding:4px 6px; border-radius:4px; line-height:1; font-family:inherit; }
+.drawer-close:hover { background:var(--paper-2); color:var(--ink); }
+.drawer-body { flex:1; overflow-y:auto; padding:1rem 1.5rem; }
+.drawer-section-label { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-3); margin-bottom:10px; }
+.plan-item {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  border:1.5px solid var(--rule); border-radius:var(--radius); margin-bottom:8px;
+  cursor:pointer; transition:all 0.12s; background:#fff;
+}
+.plan-item:hover { border-color:var(--warm); background:var(--warm-lt); }
+.plan-item.active { border-color:var(--warm); background:var(--warm-lt); }
+.plan-item-icon { font-size:18px; flex-shrink:0; }
+.plan-item-body { flex:1; min-width:0; }
+.plan-item-name { font-size:14px; font-weight:500; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.plan-item-name-input {
+  font-size:14px; font-weight:500; color:var(--ink); border:none; outline:none;
+  background:transparent; width:100%; font-family:inherit; padding:0;
+}
+.plan-item-name-input:focus { background:rgba(255,255,255,0.7); border-radius:3px; padding:0 3px; margin:0 -3px; }
+.plan-item-meta { font-size:11px; color:var(--ink-3); margin-top:1px; }
+.plan-item-actions { display:flex; gap:4px; flex-shrink:0; }
+.plan-action-btn { background:none; border:none; padding:4px 6px; border-radius:4px; cursor:pointer; font-size:13px; color:var(--ink-3); transition:all 0.12s; font-family:inherit; }
+.plan-action-btn:hover { background:var(--paper-3); color:var(--ink); }
+.plan-action-btn.delete:hover { background:#FEF2F2; color:#991B1B; }
+.drawer-new-btn {
+  width:100%; padding:11px; background:none; border:1.5px dashed var(--rule);
+  border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500;
+  color:var(--ink-3); cursor:pointer; transition:all 0.15s; margin-top:4px;
+}
+.drawer-new-btn:hover { border-color:var(--warm); color:var(--warm); background:var(--warm-lt); }
+.drawer-empty { text-align:center; padding:2rem 1rem; color:var(--ink-3); font-size:13px; line-height:1.7; }
+.plans-btn {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25);
+  border-radius:var(--radius); color:rgba(255,255,255,0.85); font-family:inherit;
+  font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap;
+  transition:background 0.15s; display:flex; align-items:center; gap:5px;
+}
+.plans-btn:hover { background:rgba(255,255,255,0.2); }
+.plans-btn-count {
+  background:rgba(255,255,255,0.2); border-radius:100px;
+  padding:1px 6px; font-size:10px; font-weight:500;
+}
+@media print { .plans-drawer, .drawer-overlay { display:none !important; } }
+
+/* Print */
 @media print {
-  #intake-screen, #loading-screen { display:none !important; }
-  .site-header, .phase-bar, .nav-bar, .print-btn, .restart-btn, .filter-banner, .edit-hint, .schedule-actions, .header-btns { display:none !important; }
+  #intake-screen, #loading-screen, #gate-screen { display:none !important; }
+  .site-header, .nav-bar, .print-btn, .restart-btn, .filter-banner, .edit-hint, .schedule-actions, .header-btns, .site-footer { display:none !important; }
   #app-screen { display:block !important; }
   .tab { display:none !important; }
   .tab#schedule { display:block !important; }
@@ -172,79 +331,27 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
   body { background:#fff; font-size:12px; }
   main { padding:0; max-width:100%; }
   .week-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
-  .week-card { page-break-inside:avoid; border:0.5px solid #ccc; padding:0.75rem; }
+  .week-card { page-break-inside:avoid; border:0.5px solid #ccc; padding:0.75rem; box-shadow:none; }
   .print-header { display:block !important; padding:1rem 0 0.75rem; border-bottom:1px solid #ccc; margin-bottom:1rem; }
   .print-header h1 { font-family:Georgia,serif; font-size:20px; font-weight:400; }
   .print-header p { font-size:11px; color:#666; margin-top:3px; }
 }
 .print-header { display:none; }
 
-@media (max-width:600px) {
-  .phase-inner { grid-template-columns:repeat(2,1fr); }
-  .site-header, .phase-bar, .nav-bar { padding-left:1rem; padding-right:1rem; }
-  main { padding:1.5rem 1rem 3rem; }
+/* TEST GATE remnant — unused but kept */
+.license-box,.license-wordmark,.license-sub,.license-input-wrap,.license-input,.license-btn,.license-error,.license-help,.license-divider { display:none; }
+
+/* Responsive */
+@media (max-width:640px) {
+  .phase-nav { grid-template-columns:repeat(2,1fr); }
+  .site-header, .nav-bar { padding-left:1rem; padding-right:1rem; }
+  main { padding:1.5rem 1rem 4rem; }
   .blackout-entry { grid-template-columns:1fr 1fr; grid-template-rows:auto auto; }
   .date-row { grid-template-columns:1fr; }
+  .intake-step-panel { padding-left:1rem; padding-right:1rem; }
+  .intake-nav { padding-left:1rem; padding-right:1rem; }
+  .prog-step span.prog-step-label { display:none; }
 }
-
-/* ── FOOTER ── */
-.site-footer {
-  background:var(--paper-3);
-  border-top:1px solid var(--rule);
-  padding:1.25rem 2rem;
-  text-align:center;
-  font-size:12px;
-  color:var(--ink-3);
-  letter-spacing:0.02em;
-}
-.site-footer a {
-  color:var(--ink-3);
-  text-decoration:none;
-  border-bottom:1px solid var(--rule);
-  transition:color 0.15s, border-color 0.15s;
-}
-.site-footer a:hover { color:var(--accent); border-bottom-color:var(--accent); }
-.site-footer .footer-dot { margin:0 8px; opacity:0.4; }
-@media print { .site-footer { display:none; } }
-/* ── SAVED BADGE ── */
-.saved-badge { display:none; align-items:center; gap:6px; background:var(--warm-lt); border:1px solid #c0d8c4; border-radius:var(--radius); padding:5px 12px; font-size:12px; color:#3D6642; font-weight:500; }
-.saved-badge svg { width:13px; height:13px; stroke:#3D6642; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
-/* ── LICENSE GATE ── */
-.license-box { width:100%; max-width:480px; text-align:center; }
-.license-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,40px); font-weight:400; line-height:1.15; margin-bottom:8px; }
-.license-wordmark em { font-style:italic; color:var(--accent); }
-.license-sub { font-size:14px; color:var(--ink-3); margin-bottom:2rem; line-height:1.7; }
-.license-input-wrap { display:flex; gap:8px; margin-bottom:12px; }
-.license-input { flex:1; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; letter-spacing:0.04em; }
-.license-input:focus { border-color:var(--accent); }
-.license-input::placeholder { color:var(--ink-3); letter-spacing:0; }
-.license-btn { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.15s,opacity 0.15s; }
-.license-btn:hover { background:#9E4A2A; }
-.license-btn:disabled { opacity:0.5; cursor:not-allowed; }
-.license-error { font-size:13px; color:#991B1B; background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; display:none; }
-.license-help { font-size:12px; color:var(--ink-3); line-height:1.7; }
-.license-help a { color:var(--accent); text-decoration:none; }
-.license-help a:hover { text-decoration:underline; }
-.license-divider { border:none; border-top:1px solid var(--rule); margin:1.5rem 0; }
-
-
-/* ── TEST GATE ── */
-#gate-screen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; }
-.gate-box { width:100%; max-width:460px; text-align:center; }
-.gate-wordmark { font-family:'DM Serif Display',serif; font-size:clamp(26px,5vw,40px); font-weight:400; line-height:1.15; margin-bottom:8px; }
-.gate-wordmark em { font-style:italic; color:var(--accent); }
-.gate-sub { font-size:14px; color:var(--ink-3); margin-bottom:2rem; line-height:1.75; }
-.gate-input-wrap { display:flex; gap:8px; margin-bottom:10px; }
-.gate-input { flex:1; border:1px solid var(--rule); border-radius:var(--radius); background:#fff; padding:10px 14px; font-family:inherit; font-size:14px; color:var(--ink); outline:none; transition:border-color 0.15s; letter-spacing:0.06em; text-transform:uppercase; }
-.gate-input:focus { border-color:var(--accent); }
-.gate-input::placeholder { color:var(--ink-3); letter-spacing:0; text-transform:none; }
-.gate-btn { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
-.gate-btn:hover { background:#9E4A2A; }
-.gate-error { font-size:13px; color:#991B1B; background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; display:none; line-height:1.6; }
-.gate-help { font-size:12px; color:var(--ink-3); margin-top:10px; line-height:1.7; }
-.gate-help a { color:var(--accent); text-decoration:none; }
-.gate-help a:hover { text-decoration:underline; }
-.gate-divider { border:none; border-top:1px solid var(--rule); margin:1.5rem 0; }
 </style>
 </head>
 <body>
@@ -252,29 +359,60 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
 <!-- ══════════════ GATE ══════════════ -->
 <div id="gate-screen">
   <div class="gate-box">
+    <p class="gate-eyebrow">Creative practice, structured</p>
     <h1 class="gate-wordmark">Your Creative<br><em>Residency</em></h1>
-    <p class="gate-sub">Enter your access key to get started.<br>Don't have one? Purchase lifetime access below.</p>
-    <div id="gate-error" class="gate-error"></div>
-    <div class="gate-input-wrap">
-      <input type="text" class="gate-input" id="gate-key-input" placeholder="Enter your key" autocomplete="off" spellcheck="false">
-      <button class="gate-btn" id="gate-btn" onclick="checkKey()">Unlock</button>
+    <p class="gate-value">A personalized AI-generated practice plan built around your medium, your schedule, and your creative goals. Yours to keep, forever.</p>
+    <div class="gate-card">
+      <div class="gate-card-label">Enter your access key</div>
+      <div class="gate-input-wrap">
+        <input type="text" class="gate-input" id="gate-key-input" placeholder="e.g. TEST-2026" autocomplete="off" spellcheck="false">
+        <button class="gate-btn" id="gate-btn" onclick="checkKey()">Unlock →</button>
+      </div>
+      <div id="gate-error" class="gate-error"></div>
     </div>
-    <p class="gate-help">Questions? <a href="mailto:brittonclarkceramics@gmail.com">brittonclarkceramics@gmail.com</a></p>
-    <hr class="gate-divider">
-    <p class="gate-help"><a href="https://brittonclark.gumroad.com/l/creativeresidency" target="_blank">Purchase Your Creative Residency →</a></p>
+    <div class="gate-links">
+      <a href="https://brittonclark.gumroad.com/l/creativeresidency" target="_blank">Purchase lifetime access →</a>
+      <hr class="gate-divider">
+      Questions? <a href="mailto:brittonclarkceramics@gmail.com">brittonclarkceramics@gmail.com</a>
+    </div>
   </div>
 </div>
 
 <!-- ══════════════ INTAKE ══════════════ -->
 <div id="intake-screen" style="display:none;">
-  <div class="intake-box">
-    <h1 class="intake-wordmark">Your Creative<br><em>Residency</em></h1>
-    <p class="intake-sub">Answer a few questions and get a full practice plan built around your medium, your schedule, and your creative goals.</p>
 
-    <!-- SECTION: Practice -->
-    <div class="intake-section-head">Your practice</div>
+  <!-- Progress bar -->
+  <div class="intake-progress-bar">
+    <div class="intake-progress-inner">
+      <div class="intake-progress-steps">
+        <div class="prog-step active" id="prog-1">
+          <div class="prog-step-num">1</div>
+          <span class="prog-step-label">Your practice</span>
+        </div>
+        <div class="prog-connector"></div>
+        <div class="prog-step" id="prog-2">
+          <div class="prog-step-num">2</div>
+          <span class="prog-step-label">Schedule</span>
+        </div>
+        <div class="prog-connector"></div>
+        <div class="prog-step" id="prog-3">
+          <div class="prog-step-num">3</div>
+          <span class="prog-step-label">Budget</span>
+        </div>
+      </div>
+      <span class="intake-progress-title">Your Creative Residency</span>
+    </div>
+  </div>
 
-    <div class="intake-step">
+  <!-- Step 1: Your Practice -->
+  <div class="intake-step-panel active" id="step-panel-1">
+    <div class="intake-panel-head">
+      <p class="intake-panel-eyebrow">Step 1 of 3</p>
+      <h2 class="intake-panel-title">Tell us about your practice</h2>
+      <p class="intake-panel-sub">Your medium, skill level, and what you're working toward. This shapes everything the AI generates for you.</p>
+    </div>
+
+    <div class="intake-field">
       <label class="intake-label">Your medium <span>pick up to 2</span></label>
       <div class="chip-row" id="chip-medium">
         <button class="chip" data-val="Ceramics / pottery">Ceramics</button>
@@ -300,7 +438,7 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       </div>
     </div>
 
-    <div class="intake-step">
+    <div class="intake-field">
       <label class="intake-label">Skill level <span>be honest, not modest</span></label>
       <div class="chip-row" id="chip-level">
         <button class="chip" data-val="Beginner (less than 2 years)">Beginner</button>
@@ -309,7 +447,7 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       </div>
     </div>
 
-    <div class="intake-step">
+    <div class="intake-field">
       <label class="intake-label">Primary goals <span>pick up to 3</span></label>
       <div class="chip-row" id="chip-goals">
         <button class="chip" data-val="Build a market-ready body of work for selling">Selling at markets</button>
@@ -321,20 +459,28 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       </div>
     </div>
 
-    <div class="intake-step">
-      <label class="intake-label">Techniques or projects you want to explore <span>optional</span></label>
+    <div class="intake-field">
+      <label class="intake-label">Techniques or projects to explore <span>optional</span></label>
       <textarea class="intake-textarea" id="techniques-input" placeholder="e.g. hand lettering, natural dyeing, plein air painting, surface decoration, building a series around a specific theme…"></textarea>
     </div>
 
-    <div class="intake-step">
-      <label class="intake-label">Artists you admire <span>comma-separated names, any medium</span></label>
+    <div class="intake-field">
+      <label class="intake-label">Artists you admire <span>comma-separated, any medium</span></label>
       <input type="text" class="intake-input" id="artists-input" placeholder="e.g. Agnes Martin, Hawthorn Ceramics, Cy Twombly, Shalya Marsh">
     </div>
 
-    <!-- SECTION: Schedule & time -->
-    <div class="intake-section-head">Schedule &amp; time</div>
+    <div id="step1-error" class="error-box" style="display:none;"></div>
+  </div>
 
-    <div class="intake-step">
+  <!-- Step 2: Schedule -->
+  <div class="intake-step-panel" id="step-panel-2">
+    <div class="intake-panel-head">
+      <p class="intake-panel-eyebrow">Step 2 of 3</p>
+      <h2 class="intake-panel-title">When are you in the studio?</h2>
+      <p class="intake-panel-sub">Set your residency window and mark any time you'll be away. The schedule builds itself around your actual life.</p>
+    </div>
+
+    <div class="intake-field">
       <label class="intake-label">Residency dates</label>
       <div class="date-row">
         <div class="date-field">
@@ -348,17 +494,17 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       </div>
     </div>
 
-    <div class="intake-step">
+    <div class="intake-field">
       <label class="intake-label">Available studio time per week</label>
       <div class="chip-row" id="chip-time">
-        <button class="chip" data-val="~5 hours per week (tight schedule, evenings only)">~5 hrs</button>
-        <button class="chip" data-val="~10 hours per week (mornings and weekends)">~10 hrs</button>
-        <button class="chip" data-val="~20 hours per week (significant blocks available)">~20 hrs</button>
+        <button class="chip" data-val="~5 hours per week (tight schedule, evenings only)">~5 hrs / week</button>
+        <button class="chip" data-val="~10 hours per week (mornings and weekends)">~10 hrs / week</button>
+        <button class="chip" data-val="~20 hours per week (significant blocks available)">~20 hrs / week</button>
         <button class="chip" data-val="Full-time (30+ hours per week)">Full-time</button>
       </div>
     </div>
 
-    <div class="intake-step">
+    <div class="intake-field">
       <label class="intake-label">Out-of-studio dates <span>travel, commitments, planned breaks</span></label>
       <div class="blackout-col-heads">
         <span>From</span><span>To</span><span>Reason</span><span></span>
@@ -367,11 +513,19 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       <button class="add-blackout-btn" onclick="addBlackout()">+ Add dates</button>
     </div>
 
-    <!-- SECTION: Budget & resources -->
-    <div class="intake-section-head">Budget &amp; resources</div>
+    <div id="step2-error" class="error-box" style="display:none;"></div>
+  </div>
 
-    <div class="intake-step">
-      <label class="intake-label">Approximate budget for the residency <span>supplies, tools, workshops, books</span></label>
+  <!-- Step 3: Budget & Resources -->
+  <div class="intake-step-panel" id="step-panel-3">
+    <div class="intake-panel-head">
+      <p class="intake-panel-eyebrow">Step 3 of 3</p>
+      <h2 class="intake-panel-title">Budget &amp; what you already have</h2>
+      <p class="intake-panel-sub">Your resources and budget shape what's recommended — so you get a plan that's actually achievable, not aspirational.</p>
+    </div>
+
+    <div class="intake-field">
+      <label class="intake-label">Approximate budget <span>supplies, tools, workshops, books</span></label>
       <div class="chip-row" id="chip-budget">
         <button class="chip" data-val="Under $100 — working with what I have">Under $100</button>
         <button class="chip" data-val="$100–$300 — modest purchases">$100–$300</button>
@@ -381,21 +535,35 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
       </div>
     </div>
 
-    <div class="intake-step">
-      <label class="intake-label">Existing resources <span>what you already have access to</span></label>
-      <textarea class="intake-textarea" id="resources-input" placeholder="e.g. wheel and kiln at a shared studio, a full set of oil paints, a darkroom, a loom, a Silhouette cutter, membership at a makerspace, a large outdoor space for plein air…"></textarea>
+    <div class="intake-field">
+      <label class="intake-label">What you already have access to <span>optional</span></label>
+      <textarea class="intake-textarea" id="resources-input" placeholder="e.g. wheel and kiln at a shared studio, a full set of oil paints, a darkroom, a loom, a Silhouette cutter, membership at a makerspace…"></textarea>
     </div>
 
-    <div id="intake-error" class="error-box" style="display:none;"></div>
-    <button class="generate-btn" id="generate-btn" onclick="startGeneration()">Generate my residency plan →</button>
+    <div id="step3-error" class="error-box" style="display:none;"></div>
   </div>
+
+  <!-- Fixed bottom nav -->
+  <div class="intake-nav">
+    <div class="intake-nav-inner">
+      <button class="btn-back" id="btn-back" onclick="intakeBack()" disabled>← Back</button>
+      <span class="intake-step-hint" id="intake-step-hint">Step 1 of 3</span>
+      <button class="btn-next" id="btn-next" onclick="intakeNext()">Next →</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════ LOADING ══════════════ -->
 <div id="loading-screen">
-  <div class="loading-title">Building your residency…</div>
+  <div class="loading-wordmark">Your Creative <em>Residency</em></div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
   <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
-  <div class="loading-status" id="loading-status">Drafting your phases</div>
+  <div class="loading-status" id="loading-status">Designing your four phases…</div>
 </div>
 
 <!-- ══════════════ APP ══════════════ -->
@@ -407,13 +575,15 @@ main { max-width:var(--max); margin:0 auto; padding:2rem 2rem 4rem; }
         <p class="site-meta" id="site-meta-line">Your practice, your plan</p>
       </div>
       <div class="header-btns">
+        <button class="plans-btn" onclick="openDrawer()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          My Plans <span class="plans-btn-count" id="plans-count">0</span>
+        </button>
         <button class="restart-btn" onclick="restartApp()">Start over</button>
       </div>
     </div>
+    <div class="phase-nav" id="phase-bar-inner"></div>
   </header>
-  <div class="phase-bar">
-    <div class="phase-inner" id="phase-bar-inner"></div>
-  </div>
   <nav class="nav-bar">
     <div class="nav-inner">
       <button class="active" onclick="showTab('overview',this)">Overview</button>
@@ -546,7 +716,18 @@ function restartApp() {
   document.getElementById('intake-screen').style.display = 'flex';
   document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
   ['techniques-input','artists-input','resources-input'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('intake-error').style.display = 'none';
+  ['step1-error','step2-error','step3-error'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  currentStep = 1;
+  goToStep(1);
+  // Reset progress indicators
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const p = document.getElementById('prog-' + i);
+    if (p) { p.classList.remove('active','done'); }
+  }
+  goToStep(1);
 }
 function setProgress(pct, msg) {
   document.getElementById('loading-bar').style.width = pct+'%';
@@ -594,14 +775,11 @@ async function startGeneration() {
   const errorEl   = document.getElementById('intake-error');
   errorEl.style.display = 'none';
 
+  // Validation handled per-step in intakeNext()
   if (!mediums.length || !level || !time || goals.length===0) {
-    errorEl.textContent = 'Please select your medium, skill level, available time, and at least one goal.';
-    errorEl.style.display = 'block';
-    return;
-  }
-  if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
-    errorEl.textContent = 'Please set a valid start and end date for your residency.';
-    errorEl.style.display = 'block';
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('intake-screen').style.display = 'flex';
+    const nb1 = document.getElementById('btn-next'); if (nb1) nb1.disabled = false;
     return;
   }
 
@@ -625,7 +803,7 @@ async function startGeneration() {
     `Out-of-studio dates: ${blackoutSummary}`
   ].join('. ');
 
-  document.getElementById('generate-btn').disabled = true;
+  const nb2 = document.getElementById('btn-next'); if (nb2) nb2.disabled = true;
   document.getElementById('intake-screen').style.display = 'none';
   document.getElementById('loading-screen').style.display = 'flex';
   setProgress(5, 'Designing your four phases…');
@@ -737,21 +915,25 @@ Generate 5 real published books and 4 online resources for ${medium}. Set alread
 
     setProgress(98, 'Putting it all together…');
 
-    buildApp(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, {
-      startDate, endDate, startLabel, endLabel, totalWeeks, budget
-    });
+    const planMeta = { startDate, endDate, startLabel, endLabel, totalWeeks, budget, medium };
+    saveCurrentPlan(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, planMeta);
+    buildApp(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, planMeta);
+    updatePlansCount();
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'block';
-    document.getElementById('generate-btn').disabled = false;
+    const nb3 = document.getElementById('btn-next'); if (nb3) nb3.disabled = false;
 
   } catch(err) {
     console.error(err);
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('intake-screen').style.display = 'flex';
-    document.getElementById('generate-btn').disabled = false;
-    errorEl.textContent = err.message || 'Something went wrong generating your plan. Please try again.';
-    errorEl.style.display = 'block';
+    const nb4 = document.getElementById('btn-next'); if (nb4) nb4.disabled = false;
+    const step3err = document.getElementById('step3-error');
+    if (step3err) {
+      step3err.textContent = err.message || 'Something went wrong generating your plan. Please try again.';
+      step3err.style.display = 'block';
+    }
   }
 }
 
@@ -777,11 +959,11 @@ function buildApp(phases, schedule, projects, rhythm, artists, resources, meta) 
 
 function buildPhaseBar(phases) {
   document.getElementById('phase-bar-inner').innerHTML = phases.map((p,i) => `
-    <div class="ph${i===0?' active':''}" onclick="selectPhase(${i})">
+    <button class="ph${i===0?' active':''}" onclick="selectPhase(${i})">
       <div class="ph-label">Phase ${i+1}</div>
       <div class="ph-name">${esc(p.name)}</div>
       <div class="ph-dates">${esc(p.dates)}</div>
-    </div>`).join('');
+    </button>`).join('');
 }
 
 function buildOverview(data, meta) {
@@ -930,15 +1112,18 @@ function showGateError(msg) {
 
 function openApp() {
   document.getElementById('gate-screen').style.display = 'none';
-  document.getElementById('intake-screen').style.display = 'flex';
+  initPlans();
+  // initPlans will show intake if no plans exist, or load the last active plan
+  if (getPlans().length === 0) {
+    document.getElementById('intake-screen').style.display = 'flex';
+  }
 }
 
 function initGate() {
-  // If already unlocked, skip gate
   const stored = localStorage.getItem(GATE_KEY_STORAGE);
   if (stored && VALID_KEYS.includes(stored)) {
     document.getElementById('gate-screen').style.display = 'none';
-    document.getElementById('intake-screen').style.display = 'flex';
+    initPlans();
   }
 }
 
@@ -949,10 +1134,273 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('keydown', e => { if (e.key === 'Enter') checkKey(); });
     input.addEventListener('input', () => { input.value = input.value.toUpperCase(); });
   }
+  // Ensure gate is visible by default until JS decides otherwise
+  const gs = document.getElementById('gate-screen');
+  if (gs) gs.style.display = 'flex';
   initGate();
 });
 
+
+
+// ── PLANS STORAGE ──────────────────────────────────────────
+const PLANS_KEY = 'cr_plans';         // array of plan objects
+const ACTIVE_PLAN_KEY = 'cr_active';  // id of currently loaded plan
+
+function getPlans() {
+  try { return JSON.parse(localStorage.getItem(PLANS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function savePlans(plans) {
+  localStorage.setItem(PLANS_KEY, JSON.stringify(plans));
+  updatePlansCount();
+}
+
+function getActivePlanId() {
+  return localStorage.getItem(ACTIVE_PLAN_KEY);
+}
+
+function setActivePlanId(id) {
+  localStorage.setItem(ACTIVE_PLAN_KEY, id);
+}
+
+function updatePlansCount() {
+  const el = document.getElementById('plans-count');
+  if (el) el.textContent = getPlans().length;
+}
+
+function autoNamePlan(medium, startLabel) {
+  const mediumShort = medium.split(' and ')[0].split(' /')[0].split(' (')[0].trim();
+  const month = startLabel.replace(/\s*\d+$/, '').trim();
+  return `${mediumShort} Residency · ${month}`;
+}
+
+function saveCurrentPlan(phases, schedule, projects, rhythm, artists, resources, meta) {
+  const plans = getPlans();
+  const id = 'plan-' + Date.now();
+  const name = autoNamePlan(meta.medium || 'Creative', meta.startLabel);
+  const plan = {
+    id, name,
+    createdAt: new Date().toISOString(),
+    meta,
+    data: { phases, schedule, projects, rhythm, artists, resources }
+  };
+  plans.unshift(plan); // newest first
+  savePlans(plans);
+  setActivePlanId(id);
+  return plan;
+}
+
+function updatePlanScheduleEdits(planId, weekCards) {
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) return;
+  weekCards.forEach((card, wi) => {
+    if (!plan.data.schedule.weeks[wi]) return;
+    card.querySelectorAll('.day-content').forEach((cell, di) => {
+      if (plan.data.schedule.weeks[wi].days[di]) {
+        plan.data.schedule.weeks[wi].days[di].content = cell.innerText.trim();
+      }
+    });
+  });
+  savePlans(plans);
+}
+
+function loadPlan(id) {
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === id);
+  if (!plan) return;
+  setActivePlanId(id);
+  buildApp(
+    plan.data.phases, plan.data.schedule, plan.data.projects,
+    plan.data.rhythm, plan.data.artists, plan.data.resources,
+    plan.meta
+  );
+  document.getElementById('intake-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  renderDrawerList();
+  closeDrawer();
+}
+
+function deletePlan(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this residency plan? This cannot be undone.')) return;
+  const plans = getPlans().filter(p => p.id !== id);
+  savePlans(plans);
+  // If we deleted the active plan, load next or go to intake
+  if (getActivePlanId() === id) {
+    localStorage.removeItem(ACTIVE_PLAN_KEY);
+    if (plans.length > 0) {
+      loadPlan(plans[0].id);
+    } else {
+      document.getElementById('app-screen').style.display = 'none';
+      document.getElementById('intake-screen').style.display = 'flex';
+      closeDrawer();
+    }
+  }
+  renderDrawerList();
+}
+
+function renamePlan(id, e) {
+  e.stopPropagation();
+  const nameEl = document.getElementById('plan-name-' + id);
+  if (!nameEl) return;
+  nameEl.contentEditable = 'true';
+  nameEl.focus();
+  // Select all text
+  const range = document.createRange();
+  range.selectNodeContents(nameEl);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  nameEl.onblur = () => {
+    nameEl.contentEditable = 'false';
+    const plans = getPlans();
+    const plan = plans.find(p => p.id === id);
+    if (plan) {
+      plan.name = nameEl.textContent.trim() || plan.name;
+      savePlans(plans);
+    }
+  };
+  nameEl.onkeydown = (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); nameEl.blur(); } };
+}
+
+function renderDrawerList() {
+  const plans = getPlans();
+  const activeId = getActivePlanId();
+  const list = document.getElementById('plans-list');
+  if (!list) return;
+  if (plans.length === 0) {
+    list.innerHTML = '<div class="drawer-empty">No saved plans yet.<br>Generate your first residency to get started.</div>';
+    return;
+  }
+  list.innerHTML = plans.map(p => {
+    const date = new Date(p.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    const isActive = p.id === activeId;
+    return `<div class="plan-item${isActive?' active':''}" onclick="loadPlan('${p.id}')">
+      <div class="plan-item-icon">${isActive ? '📌' : '📋'}</div>
+      <div class="plan-item-body">
+        <div class="plan-item-name" id="plan-name-${p.id}">${esc(p.name)}</div>
+        <div class="plan-item-meta">${esc(p.meta.startLabel||'')} – ${esc(p.meta.endLabel||'')} · Created ${date}</div>
+      </div>
+      <div class="plan-item-actions">
+        <button class="plan-action-btn" onclick="renamePlan('${p.id}',event)" title="Rename">✏️</button>
+        <button class="plan-action-btn delete" onclick="deletePlan('${p.id}',event)" title="Delete">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDrawer() {
+  renderDrawerList();
+  document.getElementById('plans-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('plans-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+function newPlanFromDrawer() {
+  closeDrawer();
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('intake-screen').style.display = 'flex';
+  document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
+  ['techniques-input','artists-input','resources-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  currentStep = 1;
+  goToStep(1);
+}
+
+function initPlans() {
+  updatePlansCount();
+  const plans = getPlans();
+  const activeId = getActivePlanId();
+  if (plans.length > 0) {
+    const planToLoad = plans.find(p => p.id === activeId) || plans[0];
+    loadPlan(planToLoad.id);
+  } else {
+    // No plans yet — show intake
+    document.getElementById('gate-screen').style.display = 'none';
+    document.getElementById('intake-screen').style.display = 'flex';
+  }
+}
+
+
+// ── STEPPED INTAKE ─────────────────────────────────────────
+let currentStep = 1;
+const TOTAL_STEPS = 3;
+
+function intakeNext() {
+  if (currentStep === 1) {
+    const mediums = getChipVals('chip-medium');
+    const level   = getChipVals('chip-level')[0];
+    const goals   = getChipVals('chip-goals');
+    const err = document.getElementById('step1-error');
+    err.style.display = 'none';
+    if (!mediums.length || !level || !goals.length) {
+      err.textContent = 'Please select your medium, skill level, and at least one goal.';
+      err.style.display = 'block';
+      err.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      return;
+    }
+  }
+  if (currentStep === 2) {
+    const time      = getChipVals('chip-time')[0];
+    const startDate = document.getElementById('start-date').value;
+    const endDate   = document.getElementById('end-date').value;
+    const err = document.getElementById('step2-error');
+    err.style.display = 'none';
+    if (!time) {
+      err.textContent = 'Please select your available studio time per week.';
+      err.style.display = 'block';
+      return;
+    }
+    if (!startDate || !endDate || new Date(endDate) <= new Date(startDate)) {
+      err.textContent = 'Please set a valid start and end date.';
+      err.style.display = 'block';
+      return;
+    }
+  }
+  if (currentStep === 3) {
+    startGeneration();
+    return;
+  }
+  goToStep(currentStep + 1);
+}
+
+function intakeBack() {
+  if (currentStep > 1) goToStep(currentStep - 1);
+}
+
+function goToStep(n) {
+  // Hide current panel
+  document.getElementById('step-panel-' + currentStep).classList.remove('active');
+  document.getElementById('prog-' + currentStep).classList.remove('active');
+  if (n > currentStep) document.getElementById('prog-' + currentStep).classList.add('done');
+  else document.getElementById('prog-' + currentStep).classList.remove('done');
+
+  currentStep = n;
+
+  // Show new panel
+  document.getElementById('step-panel-' + currentStep).classList.add('active');
+  document.getElementById('prog-' + currentStep).classList.add('active');
+
+  // Update nav buttons
+  document.getElementById('btn-back').disabled = currentStep === 1;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = currentStep === TOTAL_STEPS ? 'Generate my plan →' : 'Next →';
+  document.getElementById('intake-step-hint').textContent = 'Step ' + currentStep + ' of ' + TOTAL_STEPS;
+
+  // Scroll to top of panel
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 setupChips();
+goToStep(1);
 </script>
 <footer class="site-footer">
   Your Creative Residency
@@ -963,5 +1411,20 @@ setupChips();
   <span class="footer-dot">&middot;</span>
   <a href="mailto:brittonclarkceramics@gmail.com">brittonclarkceramics@gmail.com</a>
 </footer>
+
+<!-- ══════════════ PLANS DRAWER ══════════════ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="plans-drawer" id="plans-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">My Plans</span>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section-label">Saved residencies</div>
+    <div id="plans-list"></div>
+    <button class="drawer-new-btn" onclick="newPlanFromDrawer()">+ Create new residency</button>
+  </div>
+</div>
+
 </body>
 </html>

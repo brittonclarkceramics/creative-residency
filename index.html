@@ -1245,25 +1245,78 @@ function buildArtists(data) {
   document.getElementById('artists').innerHTML = `<p class="section-intro">${esc(data.intro)}</p><div class="artist-grid">${cards}</div>`;
 }
 
-function buildResources(data, meta) {
-  const books = data.books.map(r => `
-    <div class="resource-item">
-      <div class="resource-title">${esc(r.title)}${r.alreadyOwned?'<span class="resource-owned">You have this</span>':''}</div>
-      <div class="resource-meta">${esc(r.meta)}</div>
-      <p class="resource-why">${esc(r.why)}</p>
-    </div>`).join('');
-  const online = data.online.map(r => `
-    <div class="resource-item">
-      <div class="resource-title">${esc(r.title)}${r.free?'<span class="resource-owned" style="background:var(--warm-lt);color:#3D6642;">Free</span>':''}${r.alreadyOwned?'<span class="resource-owned">You have this</span>':''}</div>
-      <div class="resource-meta">${esc(r.meta)}</div>
-      <p class="resource-why">${esc(r.why)}</p>
-    </div>`).join('');
+function resourceItemHtml(r, type, idx) {
+  const ownBtnClass = r.userOwned ? ' active' : '';
+  const ownBtnLabel = r.userOwned ? 'Owned checkmark' : 'I own this';
+  const itemClass   = r.userOwned ? ' owned' : '';
+  return `<div class="resource-item${itemClass}" id="res-${type}-${idx}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:3px;">
+      <div class="resource-title">${esc(r.title)}${r.free ? '<span class="resource-owned" style="background:var(--warm-lt);color:#3D6642;margin-left:6px;">Free</span>' : ''}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="res-own-btn${ownBtnClass}" onclick="toggleOwned('${type}',${idx})">${ownBtnLabel}</button>
+        <button class="res-replace-btn" onclick="replaceResource('${type}',${idx})">&#8635; Replace</button>
+      </div>
+    </div>
+    <div class="resource-meta">${esc(r.meta)}</div>
+    <p class="resource-why">${esc(r.why)}</p>
+  </div>`;
+}
 
+function buildResources(data, meta) {
+  data.books  = (data.books  || []).map(r => ({...r, userOwned: r.userOwned || false}));
+  data.online = (data.online || []).map(r => ({...r, userOwned: r.userOwned || false}));
+  renderResources(data, meta);
+}
+
+function renderResources(data, meta) {
+  const books  = (data.books  || []).map((r,i) => resourceItemHtml(r,'book',i)).join('');
+  const online = (data.online || []).map((r,i) => resourceItemHtml(r,'online',i)).join('');
   document.getElementById('resources').innerHTML = `
     <p class="section-intro">${esc(data.intro)}</p>
     ${data.budgetNote ? `<div class="info-box"><h4>Budget guidance</h4><p>${esc(data.budgetNote)}</p></div>` : ''}
     <div class="resource-group" style="margin-top:1.5rem"><h3>Books</h3>${books}</div>
     <div class="resource-group"><h3>Online resources</h3>${online}</div>`;
+}
+
+function toggleOwned(type, idx) {
+  const bd = window._currentBuildData;
+  if (!bd) return;
+  const arr = type === 'book' ? bd.resources.books : bd.resources.online;
+  if (!arr[idx]) return;
+  arr[idx].userOwned = !arr[idx].userOwned;
+  const plans = getPlans();
+  const plan  = plans.find(p => p.id === getActivePlanId());
+  if (plan) { plan.data.resources = bd.resources; savePlans(plans); }
+  renderResources(bd.resources, window._currentMeta);
+}
+
+async function replaceResource(type, idx) {
+  const bd   = window._currentBuildData;
+  const meta = window._currentMeta;
+  if (!bd || !meta) return;
+  const arr = type === 'book' ? bd.resources.books : bd.resources.online;
+  const old = arr[idx];
+  const el  = document.getElementById(`res-${type}-${idx}`);
+  if (el) el.style.opacity = '0.4';
+  const existingTitles = arr.map(r => r.title).join(', ');
+  const prompt = type === 'book'
+    ? `Suggest one alternative book for a ${meta.medium} artist. The user already has: "${old.title}". Do NOT suggest any of these: ${existingTitles}. Return JSON only: {"title":"Book Title — Author","meta":"Category · Focus","why":"1-2 sentences on relevance","free":false}`
+    : `Suggest one alternative online resource for a ${meta.medium} artist. The user already has: "${old.title}". Do NOT suggest any of these: ${existingTitles}. Return JSON only: {"title":"Resource name","meta":"Type · Platform","why":"1-2 sentences on relevance","free":true}`;
+  try {
+    const replacement = await callClaude(prompt, 400);
+    replacement.userOwned = false;
+    arr[idx] = replacement;
+    if (type === 'book') bd.resources.books = arr;
+    else bd.resources.online = arr;
+    window._currentBuildData = bd;
+    const plans = getPlans();
+    const plan  = plans.find(p => p.id === getActivePlanId());
+    if (plan) { plan.data.resources = bd.resources; savePlans(plans); }
+    renderResources(bd.resources, meta);
+  } catch(err) {
+    if (el) el.style.opacity = '1';
+    alert('Could not fetch a replacement. Please try again.');
+  }
 }
 
 function esc(s) {
@@ -1478,7 +1531,7 @@ function renderTourStep() {
 function maybeAutoStartTour() {
   const seen = localStorage.getItem(TOUR_SEEN_KEY);
   if (!seen) {
-    setTimeout(() => startTour(true), 600);
+    setTimeout(() => startTour(true), 800);
   }
 }
 
@@ -1695,6 +1748,7 @@ function loadPlan(id) {
   document.getElementById('app-screen').style.display = 'block';
   renderDrawerList();
   closeDrawer();
+  maybeAutoStartTour();
 }
 
 function deletePlan(id, e) {

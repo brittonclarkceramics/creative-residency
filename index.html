@@ -373,6 +373,71 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
 .current-blackout-item button:hover { color:#8C3030; background:#FEF2F2; }
 .regen-note { font-size:12px; color:var(--ink-3); margin-top:0.75rem; line-height:1.6; background:var(--warm-lt); border-radius:var(--radius); padding:10px 12px; }
 
+
+/* ══ TOUR ═══════════════════════════════════════════════════ */
+.tour-overlay {
+  position:fixed; inset:0; z-index:500;
+  pointer-events:none;
+}
+.tour-overlay.active { pointer-events:all; }
+.tour-spotlight {
+  position:fixed; z-index:501;
+  border-radius:8px;
+  box-shadow: 0 0 0 9999px rgba(28,22,18,0.68);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  pointer-events:none;
+}
+.tour-tooltip {
+  position:fixed; z-index:502;
+  background:#fff; border-radius:12px;
+  padding:1.25rem 1.5rem;
+  width:300px; max-width:calc(100vw - 2rem);
+  box-shadow:0 8px 40px rgba(28,22,18,0.22);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.tour-tooltip-arrow {
+  position:absolute; width:12px; height:12px;
+  background:#fff; transform:rotate(45deg);
+}
+.tour-step-label {
+  font-size:10px; font-weight:500; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--accent-2); margin-bottom:6px;
+}
+.tour-tooltip h3 {
+  font-family:'DM Serif Display',serif; font-size:17px;
+  font-weight:400; margin-bottom:6px; line-height:1.3;
+}
+.tour-tooltip p {
+  font-size:13px; color:var(--ink-3); line-height:1.75; margin-bottom:1rem;
+}
+.tour-nav {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.tour-progress {
+  font-size:11px; color:var(--ink-3); font-weight:500;
+}
+.tour-nav-btns { display:flex; gap:6px; }
+.tour-btn {
+  font-family:inherit; font-size:12px; font-weight:500;
+  border-radius:var(--radius); padding:7px 14px; cursor:pointer;
+  border:none; transition:all 0.12s;
+}
+.tour-btn.primary { background:var(--accent); color:#fff; }
+.tour-btn.primary:hover { background:#9E4A2A; }
+.tour-btn.secondary { background:none; border:1.5px solid var(--rule); color:var(--ink-2); }
+.tour-btn.secondary:hover { background:var(--paper-2); }
+.tour-btn.skip { background:none; border:none; color:var(--ink-3); padding:7px 4px; font-size:12px; }
+.tour-btn.skip:hover { color:var(--ink); }
+.tour-trigger {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25);
+  border-radius:var(--radius); color:rgba(255,255,255,0.8);
+  font-family:inherit; font-size:12px; padding:6px 12px;
+  cursor:pointer; white-space:nowrap; transition:background 0.15s;
+  display:flex; align-items:center; gap:5px;
+}
+.tour-trigger:hover { background:rgba(255,255,255,0.2); }
+@media print { .tour-overlay, .tour-spotlight, .tour-tooltip { display:none !important; } }
+
 /* Print */
 @media print {
   #intake-screen, #loading-screen, #gate-screen { display:none !important; }
@@ -666,6 +731,10 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
         <p class="site-meta" id="site-meta-line">Your practice, your plan</p>
       </div>
       <div class="header-btns">
+        <button class="tour-trigger" onclick="startTour()" id="tour-trigger-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Tour
+        </button>
         <button class="plans-btn" onclick="openDrawer()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           My Plans <span class="plans-btn-count" id="plans-count">0</span>
@@ -1271,6 +1340,149 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+// ── TOUR ───────────────────────────────────────────────────
+const TOUR_SEEN_KEY = 'cr_tour_seen';
+let _tourStep = 0;
+let _tourActive = false;
+
+const TOUR_STEPS = [
+  { target: null, tab: 'overview', title: 'Welcome to Your Creative Residency!', body: 'You have just generated a personalized creative practice plan. Let us take a quick tour so you know exactly how to use it. This takes about a minute.', position: 'center' },
+  { target: '.phase-nav', tab: 'overview', title: 'Your four phases', body: 'Your residency is broken into four phases across the top. Click any phase to jump to that part of your schedule — it filters the weekly view to just those weeks.', position: 'below' },
+  { target: '.nav-bar', tab: 'overview', title: 'Six sections to explore', body: 'These tabs hold your full plan — Overview, Weekly schedule, Projects, Daily rhythm, Artists to study, and Books and resources. Each one was generated specifically for your medium and goals.', position: 'below' },
+  { target: '.phase-grid', tab: 'overview', title: 'Your phase overview', body: 'These four cards summarize what each phase is about and what you will focus on. Think of them as the big-picture arc of your residency.', position: 'above' },
+  { target: '.edit-blackout-trigger', tab: 'overview', title: 'Life happens — update your dates', body: 'If your plans change, use this button to add or remove out-of-studio dates. You can then regenerate just the schedule with your new availability.', position: 'above' },
+  { target: '.week-grid', tab: 'schedule', title: 'Your weekly schedule', body: 'Each card covers one week of your residency. The AI has planned activities specific to your medium, goals, and availability.', position: 'above' },
+  { target: '.day-content', tab: 'schedule', title: 'Editable — make it yours', body: 'Click on any day text to edit it inline. Your changes save automatically. The AI gives you a starting point — you are always in control.', position: 'above' },
+  { target: '.print-btn', tab: 'schedule', title: 'Print your schedule', body: 'Use this to print a clean version of your weekly schedule — great for putting on the studio wall. All phase filters are removed in print view.', position: 'below' },
+  { target: '.project-grid', tab: 'projects', title: 'Your project threads', body: 'These are the parallel creative tracks running through your residency. You will not work on all of them every week — rotate based on what is drying, firing, or calling to you.', position: 'above' },
+  { target: '.rhythm-grid', tab: 'rhythm', title: 'Your daily rhythm', body: 'A realistic schedule built around your available time. Each slot suggests what type of work fits best in that window, based on your studio days and blocked hours.', position: 'above' },
+  { target: '.artist-grid', tab: 'artists', title: 'Artists to study', body: 'A curated list of artists whose work and process is directly relevant to your goals. Any artists you named during setup appear with a special badge and notes on exactly what to study in their work.', position: 'above' },
+  { target: '.resource-group', tab: 'resources', title: 'Books and resources', body: 'Real books and online resources chosen for your medium and goals. No guesses about what you own — you are in charge of that.', position: 'above' },
+  { target: '.res-own-btn', tab: 'resources', title: 'Mark what you already own', body: 'Click I own this on any book or resource you already have. It will be marked as owned so you can focus your budget on what is new to you.', position: 'above' },
+  { target: '.res-replace-btn', tab: 'resources', title: 'Get a fresh suggestion', body: 'Not interested in a recommendation? Hit Replace and the AI will fetch a different suggestion — one that is not already in your list.', position: 'above' },
+  { target: '.plans-btn', tab: 'overview', title: 'Save multiple residencies', body: 'Click My Plans anytime to switch between saved residency plans, rename them, or create a new one. Each plan is saved independently in your browser.', position: 'below' }
+];
+
+function startTour(auto) {
+  if (!document.getElementById('app-screen') || document.getElementById('app-screen').style.display === 'none') return;
+  _tourStep = 0;
+  _tourActive = true;
+  document.getElementById('tour-overlay').classList.add('active');
+  renderTourStep();
+}
+
+function endTour() {
+  _tourActive = false;
+  document.getElementById('tour-overlay').classList.remove('active');
+  document.getElementById('tour-spotlight').style.display = 'none';
+  document.getElementById('tour-tooltip').style.display = 'none';
+  localStorage.setItem(TOUR_SEEN_KEY, '1');
+}
+
+function tourClickOutside(e) {
+  // Only end if clicking directly on the overlay (not tooltip or spotlight)
+  if (e.target === document.getElementById('tour-overlay')) endTour();
+}
+
+function tourStep(dir) {
+  _tourStep += dir;
+  if (_tourStep < 0) _tourStep = 0;
+  if (_tourStep >= TOUR_STEPS.length) { endTour(); return; }
+  renderTourStep();
+}
+
+function renderTourStep() {
+  const step = TOUR_STEPS[_tourStep];
+  const total = TOUR_STEPS.length;
+
+  // Switch tab if needed
+  if (step.tab) {
+    const tabBtn = document.querySelector('.nav-inner button:nth-child(' + (
+      ['overview','schedule','projects','rhythm','artists','resources'].indexOf(step.tab) + 1
+    ) + ')');
+    showTab(step.tab, tabBtn);
+  }
+
+  // Update tooltip content
+  document.getElementById('tour-step-label').textContent = 'Step ' + (_tourStep + 1) + ' of ' + total;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-body').textContent = step.body;
+  document.getElementById('tour-back').style.display = _tourStep === 0 ? 'none' : '';
+  document.getElementById('tour-next').textContent = _tourStep === total - 1 ? 'Finish ✓' : 'Next →';
+
+  const tooltip = document.getElementById('tour-tooltip');
+  const spotlight = document.getElementById('tour-spotlight');
+  tooltip.style.display = 'block';
+
+  if (step.position === 'center' || !step.target) {
+    // Centered — no spotlight
+    spotlight.style.display = 'none';
+    tooltip.style.top = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+    return;
+  }
+
+  // Find target element
+  const el = document.querySelector(step.target);
+  if (!el) {
+    spotlight.style.display = 'none';
+    tooltip.style.top = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+    return;
+  }
+
+  // Scroll target into view
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+
+  setTimeout(() => {
+    const rect = el.getBoundingClientRect();
+    const pad = 8;
+
+    // Position spotlight
+    spotlight.style.display = 'block';
+    spotlight.style.top    = (rect.top    - pad) + 'px';
+    spotlight.style.left   = (rect.left   - pad) + 'px';
+    spotlight.style.width  = (rect.width  + pad*2) + 'px';
+    spotlight.style.height = (rect.height + pad*2) + 'px';
+
+    // Position tooltip
+    tooltip.style.transform = '';
+    const tw = 300;
+    const th = tooltip.offsetHeight || 180;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 16;
+
+    let top, left;
+    if (step.position === 'below') {
+      top  = rect.bottom + pad + 10;
+      left = Math.min(Math.max(rect.left, margin), vw - tw - margin);
+    } else {
+      top  = rect.top - pad - th - 10;
+      left = Math.min(Math.max(rect.left, margin), vw - tw - margin);
+    }
+
+    // Keep within viewport
+    if (top < margin) top = rect.bottom + pad + 10;
+    if (top + th > vh - margin) top = rect.top - pad - th - 10;
+    if (top < margin) top = margin;
+
+    tooltip.style.top  = top + 'px';
+    tooltip.style.left = left + 'px';
+  }, 380); // wait for scroll + tab switch
+}
+
+function maybeAutoStartTour() {
+  const seen = localStorage.getItem(TOUR_SEEN_KEY);
+  if (!seen) {
+    setTimeout(() => startTour(true), 600);
+  }
+}
+
+
 // ── BLACKOUT EDIT MODAL ────────────────────────────────────
 let _modalBlackoutCount = 0;
 
@@ -1709,6 +1921,23 @@ goToStep(1);
       <button class="modal-btn secondary" onclick="closeBlackoutModal()">Cancel</button>
       <button class="modal-btn primary" onclick="saveBlackoutEdits()">Save dates</button>
       <button class="modal-btn regen" onclick="regenSchedule()">Update schedule</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ TOUR ══════════════ -->
+<div class="tour-overlay" id="tour-overlay" onclick="tourClickOutside(event)"></div>
+<div class="tour-spotlight" id="tour-spotlight" style="display:none;"></div>
+<div class="tour-tooltip" id="tour-tooltip" style="display:none;">
+  <div class="tour-step-label" id="tour-step-label">Step 1 of 14</div>
+  <h3 id="tour-title">Welcome</h3>
+  <p id="tour-body">Let's take a quick tour.</p>
+  <div class="tour-nav">
+    <button class="tour-btn skip" onclick="endTour()">Skip tour</button>
+    <div class="tour-nav-btns">
+      <button class="tour-btn secondary" id="tour-back" onclick="tourStep(-1)">← Back</button>
+      <button class="tour-btn primary" id="tour-next" onclick="tourStep(1)">Next →</button>
     </div>
   </div>
 </div>

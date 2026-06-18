@@ -108,6 +108,13 @@ body { font-family:'DM Sans',system-ui,sans-serif; background:var(--paper); colo
 .blackout-col-heads { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:8px; padding:0 12px; margin-bottom:4px; }
 .blackout-col-heads span { font-size:11px; color:var(--ink-3); font-weight:500; }
 .add-blackout-btn { background:none; border:1.5px dashed var(--rule); border-radius:var(--radius); padding:9px 14px; font-family:inherit; font-size:13px; color:var(--ink-3); cursor:pointer; width:100%; transition:all 0.12s; }
+
+.blocked-hours-row { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+.blocked-hour-field { flex:1; }
+.blocked-hour-field label { display:block; font-size:12px; color:var(--ink-3); margin-bottom:5px; }
+.blocked-hour-sep { font-size:13px; color:var(--ink-3); padding-top:22px; flex-shrink:0; }
+.intake-field-hint { font-size:12px; color:var(--ink-3); line-height:1.6; margin-top:4px; }
+
 .add-blackout-btn:hover { border-color:var(--accent-2); color:var(--accent); background:var(--accent-lt); }
 
 /* intake nav buttons */
@@ -243,6 +250,16 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
 /* Resources */
 .resource-group { margin-bottom:2.5rem; }
 .resource-group h3 { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; margin-bottom:1rem; padding-bottom:10px; border-bottom:1px solid var(--rule); }
+
+.res-own-btn, .res-replace-btn { font-family:inherit; font-size:11px; font-weight:500; border-radius:4px; padding:3px 8px; cursor:pointer; transition:all 0.12s; white-space:nowrap; }
+.res-own-btn { background:none; border:1px solid var(--rule); color:var(--ink-3); }
+.res-own-btn:hover { border-color:var(--warm); color:var(--warm); background:var(--warm-lt); }
+.res-own-btn.active { background:var(--warm); border-color:var(--warm); color:#fff; }
+.res-replace-btn { background:none; border:1px solid var(--rule); color:var(--ink-3); }
+.res-replace-btn:hover { border-color:var(--sky); color:var(--sky); background:var(--sky-lt); }
+.resource-item.owned { opacity:0.55; }
+.resource-item.owned .resource-title { text-decoration:line-through; }
+
 .resource-item { padding:16px 0; border-bottom:1px solid var(--paper-2); }
 .resource-item:last-child { border-bottom:none; }
 .resource-title { font-size:14px; font-weight:500; color:var(--ink); margin-bottom:3px; }
@@ -259,6 +276,15 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
 .site-footer a:hover { color:var(--accent); border-bottom-color:var(--accent); }
 .site-footer .footer-dot { margin:0 8px; opacity:0.4; }
 
+
+
+.loading-steps { display:flex; flex-direction:column; gap:8px; margin:0.5rem 0 1rem; width:260px; }
+.load-step { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-3); transition:color 0.3s; }
+.load-step.active { color:var(--ink); }
+.load-step.done { color:var(--warm); }
+.load-step-icon { font-size:14px; width:18px; text-align:center; flex-shrink:0; transition:all 0.3s; }
+.load-step.active .load-step-icon { color:var(--accent); }
+.load-step.done .load-step-icon { color:var(--warm); }
 
 /* ══ PLANS DRAWER ═══════════════════════════════════════════ */
 .drawer-overlay { position:fixed; inset:0; background:rgba(44,36,32,0.35); z-index:100; opacity:0; pointer-events:none; transition:opacity 0.25s; }
@@ -319,6 +345,32 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
   padding:1px 6px; font-size:10px; font-weight:500;
 }
 @media print { .plans-drawer, .drawer-overlay { display:none !important; } }
+
+
+/* ══ BLACKOUT EDIT MODAL ════════════════════════════════════ */
+.modal-overlay { position:fixed; inset:0; background:rgba(44,36,32,0.4); z-index:200; display:none; align-items:center; justify-content:center; padding:1rem; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:12px; padding:2rem; width:100%; max-width:520px; box-shadow:0 8px 40px rgba(44,36,32,0.18); max-height:90vh; overflow-y:auto; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+.modal-title { font-family:'DM Serif Display',serif; font-size:20px; font-weight:400; }
+.modal-close { background:none; border:none; font-size:22px; color:var(--ink-3); cursor:pointer; padding:4px 6px; border-radius:4px; font-family:inherit; }
+.modal-close:hover { background:var(--paper-2); }
+.modal-body { margin-bottom:1.25rem; }
+.modal-footer { display:flex; gap:10px; justify-content:flex-end; }
+.modal-btn { padding:9px 20px; border-radius:var(--radius); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; transition:all 0.12s; border:none; }
+.modal-btn.primary { background:var(--accent); color:#fff; }
+.modal-btn.primary:hover { background:#9E4A2A; }
+.modal-btn.secondary { background:none; border:1.5px solid var(--rule); color:var(--ink-2); }
+.modal-btn.secondary:hover { background:var(--paper-2); }
+.modal-btn.regen { background:var(--warm); color:#fff; }
+.modal-btn.regen:hover { background:#5a7860; }
+.edit-blackout-trigger { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-3); background:none; border:1px solid var(--rule); border-radius:var(--radius); padding:4px 10px; cursor:pointer; font-family:inherit; margin-top:0.75rem; transition:all 0.12s; }
+.edit-blackout-trigger:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-lt); }
+.current-blackouts { margin-bottom:1rem; }
+.current-blackout-item { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--paper); border-radius:var(--radius); margin-bottom:6px; font-size:13px; }
+.current-blackout-item button { background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:16px; padding:2px 5px; border-radius:3px; font-family:inherit; }
+.current-blackout-item button:hover { color:#8C3030; background:#FEF2F2; }
+.regen-note { font-size:12px; color:var(--ink-3); margin-top:0.75rem; line-height:1.6; background:var(--warm-lt); border-radius:var(--radius); padding:10px 12px; }
 
 /* Print */
 @media print {
@@ -505,6 +557,35 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
     </div>
 
     <div class="intake-field">
+      <label class="intake-label">Studio days <span>which days are available to you</span></label>
+      <div class="chip-row" id="chip-days">
+        <button class="chip" data-val="Monday">Mon</button>
+        <button class="chip" data-val="Tuesday">Tue</button>
+        <button class="chip" data-val="Wednesday">Wed</button>
+        <button class="chip" data-val="Thursday">Thu</button>
+        <button class="chip" data-val="Friday">Fri</button>
+        <button class="chip" data-val="Saturday">Sat</button>
+        <button class="chip" data-val="Sunday">Sun</button>
+      </div>
+    </div>
+
+    <div class="intake-field">
+      <label class="intake-label">Blocked hours <span>optional — time you're unavailable each studio day</span></label>
+      <div class="blocked-hours-row">
+        <div class="blocked-hour-field">
+          <label for="blocked-from">Unavailable from</label>
+          <input type="time" class="intake-input" id="blocked-from" placeholder="09:00">
+        </div>
+        <div class="blocked-hour-sep">to</div>
+        <div class="blocked-hour-field">
+          <label for="blocked-to">until</label>
+          <input type="time" class="intake-input" id="blocked-to" placeholder="17:00">
+        </div>
+      </div>
+      <p class="intake-field-hint">e.g. 9am–5pm if you work a day job, or 8pm–11pm if evenings are off limits</p>
+    </div>
+
+    <div class="intake-field">
       <label class="intake-label">Out-of-studio dates <span>travel, commitments, planned breaks</span></label>
       <div class="blackout-col-heads">
         <span>From</span><span>To</span><span>Reason</span><span></span>
@@ -562,8 +643,16 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
     <div class="loading-dot"></div>
     <div class="loading-dot"></div>
   </div>
+  <div class="loading-steps" id="loading-steps">
+    <div class="load-step" id="lstep-1"><span class="load-step-icon">○</span><span class="load-step-label">Designing your phases</span></div>
+    <div class="load-step" id="lstep-2"><span class="load-step-icon">○</span><span class="load-step-label">Building weekly schedule</span></div>
+    <div class="load-step" id="lstep-3"><span class="load-step-icon">○</span><span class="load-step-label">Identifying project threads</span></div>
+    <div class="load-step" id="lstep-4"><span class="load-step-icon">○</span><span class="load-step-label">Mapping daily rhythm</span></div>
+    <div class="load-step" id="lstep-5"><span class="load-step-icon">○</span><span class="load-step-label">Selecting artists to study</span></div>
+    <div class="load-step" id="lstep-6"><span class="load-step-icon">○</span><span class="load-step-label">Compiling books &amp; resources</span></div>
+  </div>
   <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
-  <div class="loading-status" id="loading-status">Designing your four phases…</div>
+  <div class="loading-status" id="loading-status">Starting…</div>
 </div>
 
 <!-- ══════════════ APP ══════════════ -->
@@ -614,7 +703,7 @@ const PHASE_COLORS = ['badge-p1','badge-p2','badge-p3','badge-p4'];
 // ── Chip setup ──
 function setupChips() {
   document.querySelectorAll('.chip-row').forEach(row => {
-    const maxSel = row.id === 'chip-goals' ? 3 : row.id === 'chip-medium' ? 2 : 1;
+    const maxSel = row.id === 'chip-goals' ? 3 : row.id === 'chip-medium' ? 2 : row.id === 'chip-days' ? 7 : 1;
     row.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         if (chip.classList.contains('selected')) { chip.classList.remove('selected'); return; }
@@ -729,9 +818,21 @@ function restartApp() {
   }
   goToStep(1);
 }
-function setProgress(pct, msg) {
+function setProgress(pct, msg, stepNum) {
   document.getElementById('loading-bar').style.width = pct+'%';
   document.getElementById('loading-status').textContent = msg;
+  if (stepNum) {
+    // Mark previous steps done, current active
+    for (let i = 1; i <= 6; i++) {
+      const el = document.getElementById('lstep-' + i);
+      if (!el) continue;
+      el.classList.remove('active','done');
+      const icon = el.querySelector('.load-step-icon');
+      if (i < stepNum) { el.classList.add('done'); icon.textContent = '✓'; }
+      else if (i === stepNum) { el.classList.add('active'); icon.textContent = '●'; }
+      else { icon.textContent = '○'; }
+    }
+  }
 }
 
 // ── API ──
@@ -772,6 +873,12 @@ async function startGeneration() {
   const startDate = document.getElementById('start-date').value;
   const endDate   = document.getElementById('end-date').value;
   const blackouts = getBlackouts();
+  const studioDays = getChipVals('chip-days');
+  const blockedFrom = document.getElementById('blocked-from') ? document.getElementById('blocked-from').value : '';
+  const blockedTo   = document.getElementById('blocked-to')   ? document.getElementById('blocked-to').value   : '';
+  const availabilityNote = studioDays.length
+    ? 'Available studio days: ' + studioDays.join(', ') + (blockedFrom && blockedTo ? '. Blocked hours each day: ' + blockedFrom + ' to ' + blockedTo : '') + '.'
+    : (blockedFrom && blockedTo ? 'Blocked hours each day: ' + blockedFrom + ' to ' + blockedTo + '.' : 'All days available.');
   const errorEl   = document.getElementById('step3-error');
   if (errorEl) errorEl.style.display = 'none';
 
@@ -800,6 +907,7 @@ async function startGeneration() {
     `Budget: ${budget||'unspecified'}`,
     `Existing resources/equipment: ${existingResources||'none specified'}`,
     `Residency dates: ${startLabel} – ${endLabel} (${totalWeeks} weeks)`,
+    `Studio availability: ${availabilityNote}`,
     `Out-of-studio dates: ${blackoutSummary}`
   ].join('. ');
 
@@ -826,7 +934,7 @@ async function startGeneration() {
   ];
 
   try {
-    setProgress(15, 'Designing your four phases…');
+    setProgress(15, 'Designing your four phases…', 1);
     // phases: 4 objects, short strings — 800 tokens is plenty
     const phasesData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist running ${startLabel} to ${endLabel}. Context: ${context}
@@ -844,13 +952,13 @@ Tags should be specific techniques or activities relevant to ${medium}, not gene
       800
     );
 
-    setProgress(35, 'Building your weekly schedule…');
+    setProgress(35, 'Building your weekly schedule…', 2);
     // schedule: up to 16 week objects, each with 2 day rows — needs the most tokens
     const numWeekEntries = Math.min(Math.ceil(totalWeeks / 1.2), 14);
     const scheduleData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
 
-Out-of-studio dates: ${blackoutSummary}. Mark blackout weeks in the relevant day entry with a brief note and one prep suggestion.
+Out-of-studio dates: ${blackoutSummary}. Studio availability: ${availabilityNote}. Mark blackout weeks in the relevant day entry with a brief note and one prep suggestion.
 
 Phase names: P1: ${phasesData.phases[0].name}, P2: ${phasesData.phases[1].name}, P3: ${phasesData.phases[2].name}, P4: ${phasesData.phases[3].name}
 
@@ -861,7 +969,7 @@ Generate ${numWeekEntries} entries total. Group middle weeks into pairs (e.g. "W
       3500
     );
 
-    setProgress(52, 'Identifying project threads…');
+    setProgress(52, 'Identifying project threads…', 3);
     // projects: 5-6 objects with short descriptions
     const projectsData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -873,7 +981,7 @@ Generate 5 project threads specific to ${medium}. Prioritize existing resources:
       1400
     );
 
-    setProgress(67, 'Mapping daily rhythm…');
+    setProgress(67, 'Mapping daily rhythm…', 4);
     // rhythm: 4 time slots, short item lists
     const rhythmData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -885,7 +993,7 @@ Generate 4 time slots for: ${time}. 3 items per slot max. Items specific to ${me
       900
     );
 
-    setProgress(80, 'Selecting artists to study…');
+    setProgress(80, 'Selecting artists to study…', 5);
     // artists: 6-8 cards
     const artistsData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -899,7 +1007,7 @@ Generate 6-8 real established artists. Include ALL admired artists with isAdmire
       1600
     );
 
-    setProgress(91, 'Compiling books and resources…');
+    setProgress(91, 'Compiling books and resources…', 6);
     // resources: 5-6 books + 4-5 online
     const resourcesData = await callClaude(
       `You are planning a ${totalWeeks}-week artist residency for a ${level} ${medium} artist. Context: ${context}
@@ -913,9 +1021,9 @@ Generate 5 real published books and 4 online resources for ${medium}. Set alread
       1600
     );
 
-    setProgress(98, 'Putting it all together…');
+    setProgress(100, 'All done — building your plan…', 6);
 
-    const planMeta = { startDate, endDate, startLabel, endLabel, totalWeeks, budget, medium };
+    const planMeta = { startDate, endDate, startLabel, endLabel, totalWeeks, budget, medium, studioDays, blockedFrom, blockedTo, blackouts };
     saveCurrentPlan(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, planMeta);
     buildApp(phasesData, scheduleData, projectsData, rhythmData, artistsData, resourcesData, planMeta);
     updatePlansCount();
@@ -939,6 +1047,8 @@ Generate 5 real published books and 4 online resources for ${medium}. Set alread
 
 // ── Build app ──
 function buildApp(phases, schedule, projects, rhythm, artists, resources, meta) {
+  window._currentBuildData = { phases, schedule, projects, rhythm, artists, resources };
+  window._currentMeta = meta;
   const yr = meta.startDate.split('-')[0];
   document.getElementById('title-year').textContent = yr;
   document.getElementById('site-meta-line').textContent = `${meta.startLabel} – ${meta.endLabel} · ${phases.tagline}`;
@@ -967,6 +1077,8 @@ function buildPhaseBar(phases) {
 }
 
 function buildOverview(data, meta) {
+  // Store meta on window for blackout modal access
+  window._currentMeta = meta;
   const cards = data.phases.map((p,i) => `
     <div class="phase-card">
       <div class="phase-eyebrow">Phase ${i+1}</div>
@@ -975,8 +1087,22 @@ function buildOverview(data, meta) {
       <p class="phase-body">${esc(p.description)}</p>
       <div class="tag-row">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
     </div>`).join('');
+  const blackoutSummaryHtml = (meta.blackouts && meta.blackouts.length)
+    ? meta.blackouts.map(b => `<span style="background:var(--warm-lt);color:#3D6642;padding:2px 8px;border-radius:4px;font-size:12px;margin-right:4px;">${esc(b.from)}${b.to&&b.to!==b.from?' – '+esc(b.to):''} (${esc(b.reason)})</span>`).join('')
+    : '<span style="font-size:13px;color:var(--ink-3);">None set</span>';
+
   document.getElementById('overview').innerHTML = `
     <p class="section-intro">${esc(data.intro)}</p>
+    <div style="margin-bottom:1.5rem;padding:1rem 1.25rem;background:#fff;border:1px solid var(--rule);border-radius:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:500;color:var(--ink-2);">Out-of-studio dates</span>
+        <button class="edit-blackout-trigger" onclick="openBlackoutModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit dates
+        </button>
+      </div>
+      <div>${blackoutSummaryHtml}</div>
+    </div>
     <div class="phase-grid">${cards}</div>`;
 }
 
@@ -1140,6 +1266,140 @@ document.addEventListener('DOMContentLoaded', () => {
   initGate();
 });
 
+
+
+
+// ── BLACKOUT EDIT MODAL ────────────────────────────────────
+let _modalBlackoutCount = 0;
+
+function openBlackoutModal() {
+  const meta = window._currentMeta || {};
+  const existing = meta.blackouts || [];
+  const listEl = document.getElementById('modal-blackout-list');
+  const newEl  = document.getElementById('modal-new-blackouts');
+  newEl.innerHTML = '';
+  _modalBlackoutCount = 0;
+
+  if (existing.length) {
+    listEl.innerHTML = '<div style="font-size:12px;font-weight:500;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Current dates</div>' +
+      existing.map((b,i) => `
+        <div class="current-blackout-item" id="existing-bo-${i}">
+          <span>${esc(b.from)}${b.to&&b.to!==b.from?' – '+esc(b.to):''} · ${esc(b.reason)}</span>
+          <button onclick="removeExistingBlackout(${i})">×</button>
+        </div>`).join('');
+  } else {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--ink-3);margin-bottom:0.75rem;">No dates set yet.</div>';
+  }
+
+  document.getElementById('blackout-modal').classList.add('open');
+}
+
+function closeBlackoutModal() {
+  document.getElementById('blackout-modal').classList.remove('open');
+}
+
+function removeExistingBlackout(i) {
+  const meta = window._currentMeta || {};
+  if (meta.blackouts) meta.blackouts.splice(i, 1);
+  openBlackoutModal(); // re-render
+}
+
+function addModalBlackout() {
+  _modalBlackoutCount++;
+  const id = 'mbo-' + _modalBlackoutCount;
+  const div = document.createElement('div');
+  div.className = 'blackout-entry';
+  div.id = id;
+  div.innerHTML = `
+    <input type="date" class="mbo-from">
+    <input type="date" class="mbo-to">
+    <select class="mbo-reason">
+      <option value="Travel">Travel</option>
+      <option value="Family commitment">Family</option>
+      <option value="Work obligation">Work</option>
+      <option value="Holiday">Holiday</option>
+      <option value="Planned rest">Planned rest</option>
+      <option value="Other">Other</option>
+    </select>
+    <button class="remove-btn" onclick="this.closest('.blackout-entry').remove()">×</button>`;
+  document.getElementById('modal-new-blackouts').appendChild(div);
+}
+
+function saveBlackoutEdits() {
+  const meta = window._currentMeta || {};
+  // Gather new entries
+  const newEntries = [];
+  document.querySelectorAll('#modal-new-blackouts .blackout-entry').forEach(entry => {
+    const from   = entry.querySelector('.mbo-from').value;
+    const to     = entry.querySelector('.mbo-to').value;
+    const reason = entry.querySelector('.mbo-reason').value;
+    if (from) newEntries.push({ from, to: to || from, reason });
+  });
+  meta.blackouts = [...(meta.blackouts || []), ...newEntries];
+  window._currentMeta = meta;
+
+  // Update active plan in storage
+  const plans = getPlans();
+  const plan = plans.find(p => p.id === getActivePlanId());
+  if (plan) { plan.meta = meta; savePlans(plans); }
+
+  // Refresh overview to show updated dates
+  if (window._currentBuildData) {
+    buildOverview(window._currentBuildData.phases, meta);
+  }
+  closeBlackoutModal();
+}
+
+async function regenSchedule() {
+  saveBlackoutEdits();
+  const meta = window._currentMeta;
+  const bd   = window._currentBuildData;
+  if (!meta || !bd) return;
+
+  closeBlackoutModal();
+  document.getElementById('loading-screen').style.display = 'flex';
+  setProgress(20, 'Rebuilding your schedule…', 2);
+
+  const blackoutSummary = (meta.blackouts||[]).length
+    ? meta.blackouts.map(b => `${b.from}${b.to!==b.from?' – '+b.to:''} (${b.reason})`).join('; ')
+    : 'none';
+  const availNote = meta.studioDays && meta.studioDays.length
+    ? 'Available days: ' + meta.studioDays.join(', ') + (meta.blockedFrom&&meta.blockedTo ? '. Blocked: '+meta.blockedFrom+' to '+meta.blockedTo:'')
+    : '';
+
+  try {
+    const scheduleData = await callClaude(
+      `You are updating a ${meta.totalWeeks}-week artist residency schedule for a ${meta.medium} artist running ${meta.startLabel} to ${meta.endLabel}.
+
+Out-of-studio dates: ${blackoutSummary}. ${availNote}
+Phase names: P1: ${bd.phases.phases[0].name}, P2: ${bd.phases.phases[1].name}, P3: ${bd.phases.phases[2].name}, P4: ${bd.phases.phases[3].name}
+
+Return JSON:
+{"weeks":[{"title":"Week 1","range":"${meta.startLabel}–[end]","phase":1,"days":[{"label":"Mon–Fri","content":"1 sentence of activities"},{"label":"Weekend","content":"1 sentence weekend focus"}]}]}
+
+Generate the same number of week entries as before. Mark blackout periods clearly. Keep content to ONE sentence per day entry.`,
+      3500
+    );
+
+    bd.schedule = scheduleData;
+    window._currentBuildData = bd;
+    buildSchedule(scheduleData);
+
+    // Update plan storage
+    const plans = getPlans();
+    const plan = plans.find(p => p.id === getActivePlanId());
+    if (plan) { plan.data.schedule = scheduleData; plan.meta = meta; savePlans(plans); }
+
+    setProgress(100, 'Schedule updated!', 6);
+    setTimeout(() => {
+      document.getElementById('loading-screen').style.display = 'none';
+      showTab('schedule', document.querySelector('.nav-inner button:nth-child(2)'));
+    }, 600);
+  } catch(err) {
+    document.getElementById('loading-screen').style.display = 'none';
+    alert('Could not regenerate schedule: ' + err.message);
+  }
+}
 
 
 // ── PLANS STORAGE ──────────────────────────────────────────
@@ -1423,6 +1683,31 @@ goToStep(1);
     <div class="drawer-section-label">Saved residencies</div>
     <div id="plans-list"></div>
     <button class="drawer-new-btn" onclick="newPlanFromDrawer()">+ Create new residency</button>
+  </div>
+</div>
+
+
+<!-- ══════════════ BLACKOUT EDIT MODAL ══════════════ -->
+<div class="modal-overlay" id="blackout-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">Out-of-studio dates</span>
+      <button class="modal-close" onclick="closeBlackoutModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="current-blackouts" id="modal-blackout-list"></div>
+      <div class="blackout-col-heads" style="margin-top:1rem;">
+        <span>From</span><span>To</span><span>Reason</span><span></span>
+      </div>
+      <div class="blackout-list" id="modal-new-blackouts"></div>
+      <button class="add-blackout-btn" onclick="addModalBlackout()" style="margin-top:8px;">+ Add dates</button>
+      <div class="regen-note">After saving, click <strong>Update schedule</strong> to regenerate your weekly schedule with the new dates reflected.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn secondary" onclick="closeBlackoutModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveBlackoutEdits()">Save dates</button>
+      <button class="modal-btn regen" onclick="regenSchedule()">Update schedule</button>
+    </div>
   </div>
 </div>
 

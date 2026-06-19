@@ -1102,6 +1102,7 @@ Generate 5 real published books and 4 online resources for ${medium}. Set alread
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'block';
     const nb3 = document.getElementById('btn-next'); if (nb3) nb3.disabled = false;
+    maybeAutoStartTour();
 
   } catch(err) {
     console.error(err);

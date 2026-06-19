@@ -150,6 +150,7 @@ body { font-family:'DM Sans',system-ui,sans-serif; background:var(--paper); colo
 .site-title { font-family:'DM Serif Display',serif; font-size:clamp(18px,3vw,26px); font-weight:400; line-height:1.2; }
 .site-title em { font-style:italic; opacity:0.65; }
 .site-meta { font-size:11px; opacity:0.55; letter-spacing:0.04em; text-transform:uppercase; margin-top:2px; }
+.site-plan-name { font-family:"DM Serif Display",serif; font-size:clamp(13px,2vw,16px); font-style:italic; opacity:0.75; margin-top:3px; }
 .header-btns { display:flex; gap:8px; flex-shrink:0; align-items:center; }
 .restart-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); border-radius:var(--radius); color:rgba(255,255,255,0.8); font-family:inherit; font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
 .restart-btn:hover { background:rgba(255,255,255,0.2); }
@@ -727,8 +728,9 @@ main { max-width:var(--max); margin:0 auto; padding:2.5rem 2rem 5rem; }
   <header class="site-header">
     <div class="site-header-inner">
       <div>
-        <h1 class="site-title" id="site-title">Creative Residency <em id="title-year">2026</em></h1>
+        <h1 class="site-title">Your Creative Residency</h1>
         <p class="site-meta" id="site-meta-line">Your practice, your plan</p>
+        <p class="site-plan-name" id="site-plan-name"></p>
       </div>
       <div class="header-btns">
         <button class="tour-trigger" onclick="startTour()" id="tour-trigger-btn">
@@ -1122,8 +1124,12 @@ function buildApp(phases, schedule, projects, rhythm, artists, resources, meta) 
   window._currentBuildData = { phases, schedule, projects, rhythm, artists, resources };
   window._currentMeta = meta;
   const yr = meta.startDate.split('-')[0];
-  document.getElementById('title-year').textContent = yr;
-  document.getElementById('site-meta-line').textContent = `${meta.startLabel} – ${meta.endLabel} · ${phases.tagline}`;
+  // title-year removed — main title is always 'Your Creative Residency'
+  document.getElementById('site-meta-line').textContent = meta.startLabel + ' – ' + meta.endLabel;
+  const activePlan = getPlans().find(p => p.id === getActivePlanId());
+  const planName = activePlan ? activePlan.name : phases.tagline;
+  const planNameEl = document.getElementById('site-plan-name');
+  if (planNameEl) planNameEl.textContent = planName;
   document.getElementById('print-title').textContent = `Creative Residency ${yr} — Weekly Schedule`;
   document.getElementById('print-sub').textContent = phases.tagline;
 
